@@ -79,11 +79,17 @@ class SearchProfilesTexts:
 
 
 @dataclass(frozen=True)
+class ErrorTexts:
+    internal_error: str = "Внутренняя ошибка"
+
+
+@dataclass(frozen=True)
 class Texts:
     welcome_texts: WelcomeTexts = WelcomeTexts()
     menu_texts: MenuTexts = MenuTexts()
     profile_texts: ProfileTexts = ProfileTexts()
     search_profiles_texts: SearchProfilesTexts = SearchProfilesTexts()
+    error_texts: ErrorTexts = ErrorTexts()
 
 
 TEXTS: Texts = Texts()

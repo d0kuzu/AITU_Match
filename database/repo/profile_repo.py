@@ -1,9 +1,11 @@
 import json
 import logging
 
-from sqlalchemy import select
+from sqlalchemy import select, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config.enums import SexEnum
+from database.models.action import Action
 from database.models.profile import Profile
 from database.repo.repo import Repo
 
@@ -49,15 +51,42 @@ class ProfileRepo(Repo):
             logging.error(f"profile_repo.search_by_user_id error {user_id}: {e}")
             return None
 
-    async def search_random_user(self, user_id: int) -> Profile|None:
+    async def get_sex_info(self, user_id: int) -> tuple[SexEnum, SexEnum] | None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    select(Profile.sex, Profile.opposite_sex)
+                    .where(Profile.userid == user_id)
+                ).limit(1)
+
+                row = result.one_or_none()
+
+                if row is None:
+                    return None
+
+                return row
+        except Exception as e:
+            print(f"profile_repo.get_sex_info error {user_id}: {e}")
+
+    async def search_random_user(self, user_id: int, user_sex:SexEnum, opposite_sex: SexEnum) -> Profile|None:
         try:
             async with self.session.begin():
                 subq = (
-                    select(Action.action_owner).where(Action.action_owner == user_id or Action.action_target == user_id)
+                    select(Action.action_target)
+                    .where(
+                        or_(
+                            Action.action_owner == user_id,
+                            Action.action_target == user_id
+                        )
+                    )
                 )
                 stmt = (
                     select(Profile)
-                    .where(Profile.user_id.notin_(subq))
+                    .where(
+                        and_(Profile.user_id.notin_(subq), Profile.user_id != user_id),
+                        Profile.sex == opposite_sex,
+                        Profile.opposite_sex == user_sex
+                    )
                     .limit(1)
                 )
 
