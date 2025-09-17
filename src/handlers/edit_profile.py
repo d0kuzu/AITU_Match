@@ -4,6 +4,7 @@ from aiogram import F, Bot, Router
 from aiogram.types import Message, FSInputFile, KeyboardButton, ReplyKeyboardMarkup
 from aiogram.fsm.context import FSMContext
 
+from src.repository.types import SexEnum
 from src.states import UserRoadmap, EditProfileStates
 from src.keyboards.reply import main_menu_keyboard
 from src.service.db_service import ServiceDB
@@ -13,7 +14,8 @@ from src.static.text.texts import text_male, text_female
 
 edit_router = Router()
 
-UPLOAD_DIR_EDIT = Path('/app/src/static/users')
+BASE_DIR = Path(__file__).resolve().parent.parent
+UPLOAD_DIR_EDIT = BASE_DIR / "static" / "users"
 UPLOAD_DIR_EDIT.mkdir(parents=True, exist_ok=True)
 
 TEXT_SKIP_BUTTON = "Оставить как есть ⏭️"
@@ -94,7 +96,7 @@ async def edit_profile_age(message: Message, state: FSMContext):
     
     updated_data = await state.get_data()
     await message.answer(
-        f"Возраст обновлен на: {updated_data['age']}. Текущий пол: {data['original_sex']}. Выберите новый или оставьте как есть.",
+        f"Возраст обновлен на: {updated_data['age']}. Текущий пол: {"мужской" if data['original_sex'] == SexEnum.MALE else "женский"}. Выберите новый или оставьте как есть.",
         reply_markup=sex_selection_horizontal_keyboard_with_skip()
     )
     await state.set_state(EditProfileStates.sex)
@@ -113,7 +115,7 @@ async def edit_profile_sex(message: Message, state: FSMContext):
 
     updated_data = await state.get_data()
     await message.answer(
-        f"Пол обновлен на: {updated_data['sex']}. Текущая специальность: {data['original_uni']}. Введите новую или оставьте как есть.",
+        f"Пол обновлен на: {"мужской" if updated_data['sex'] == SexEnum.MALE else "женский"}. Текущая специальность: {data['original_uni']}. Введите новую или оставьте как есть.",
         reply_markup=skip_keyboard()
     )
     await state.set_state(EditProfileStates.university)
@@ -218,7 +220,7 @@ async def edit_profile_photo(message: Message, state: FSMContext, bot: Bot):
         f"Анкета обновлена!\n"
         f"Имя: {profile_update_schema.name}\n"
         f"Возраст: {profile_update_schema.age}\n"
-        f"Пол: {profile_update_schema.sex}\n"
+        f"Пол: {"мужской" if profile_update_schema.sex == SexEnum.MALE else "женский"}\n"
         f"Специальность: {profile_update_schema.uni}\n"
         f"Описание: {profile_update_schema.description}"
     )

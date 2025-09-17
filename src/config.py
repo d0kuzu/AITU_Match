@@ -17,10 +17,10 @@ class Settings(BaseSettings):
     @property
     def database_url(self):
         return (
-            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@db:5432/{self.DB_NAME}"
+            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@localhost:5432/{self.DB_NAME}"  #TODO replace localhost to db after fixing
         )
     
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file="../.env", extra="ignore") #TODO replace path to ".env"
 
 
 settings = Settings()

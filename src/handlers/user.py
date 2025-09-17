@@ -40,17 +40,17 @@ async def user_start(message: Message, state: FSMContext):
 async def user_get_token(message: Message, state: FSMContext):
     await state.set_state(UserRoadmap.check_token)
     await message.answer(
-        "Ты еще не зарегестрирован! Введи инвайт-код и присоединяйся!",
+        "Ты еще не зарегестрирован! Введи barcode и присоединяйся!",
         reply_markup=ReplyKeyboardRemove(),
     )
 
 
 @user_router.message(UserRoadmap.check_token)
 async def user_check_token(message: Message, state: FSMContext):
-    if message.text:
-        if message.text == settings.ADMIN_TOKEN or await ServiceDB.is_valid_code(message.text):
+    if message.text and message.text.isdigit():
+        if len(message.text) == 6:
             try:
-                await ServiceDB.add_user(message.from_user.id)
+                await ServiceDB.add_user(message.from_user.id, int(message.text))
                 await state.set_state(UserRoadmap.main_menu)
                 await message.answer(
                     "Welcome to the club, buddy!",
@@ -61,9 +61,9 @@ async def user_check_token(message: Message, state: FSMContext):
                 await state.clear()
                 await message.answer("Произошла ошибка при регистрации. Попробуйте еще раз.")
         else:
-            await message.answer("Такого инвайта не существует!")
+            await message.answer("Твой barcode неверен!")
     else:
-        await message.answer("Инвайт-код должен быть текстом!")
+        await message.answer("Barcode должен быть числом!")
 
 
 @user_router.message(UserRoadmap.main_menu, F.text == text_show_invite_code)

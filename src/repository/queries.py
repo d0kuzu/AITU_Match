@@ -22,12 +22,13 @@ class AsyncORM:
 
 class UserORM:
     @staticmethod
-    async def create_user(tg_id: int, invites: int, invite_code: str | None):
+    async def create_user(tg_id: int, invites: int, barcode: int, invite_code: str | None):
         async with session_maker() as session:
             new_user = User(
                 tg_id = tg_id,
                 invites=invites,
                 invite_code=invite_code,
+                barcode=barcode
             )
             session.add(new_user)
             

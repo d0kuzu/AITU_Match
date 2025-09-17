@@ -35,6 +35,7 @@ class User(Base):
     tg_id: Mapped[TgID] = mapped_column(nullable=False, unique=True)
     invites: Mapped[int] = mapped_column(Integer, nullable=False, server_default="3")
     invite_code: Mapped[Str256] = mapped_column(nullable=True)
+    barcode: Mapped[int] = mapped_column(Integer, nullable=False)
 
     profile: Mapped["Profile"] = relationship(
         back_populates="user",

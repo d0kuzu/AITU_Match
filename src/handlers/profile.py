@@ -14,7 +14,8 @@ from src.static.text.texts import text_male, text_female
 
 profile_router = Router()
 
-UPLOAD_DIR = Path('/app/src/static/users')
+BASE_DIR = Path(__file__).resolve().parent.parent
+UPLOAD_DIR = BASE_DIR / "static" / "users"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 

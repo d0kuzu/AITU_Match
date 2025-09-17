@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import CommandStart, Command
@@ -24,7 +26,10 @@ _Нажми *"Начать"*, чтобы создать свою анкету и
 """
 
 
-WELCOME_IMAGE = FSInputFile("src/static/bot/welcome.jpeg")
+BASE_DIR = Path(__file__).resolve().parent.parent
+STATIC_DIR = BASE_DIR / "static"
+
+WELCOME_IMAGE = FSInputFile(STATIC_DIR / "bot" / "welcome.jpeg")
 
 
 commands_router = Router()
@@ -38,6 +43,7 @@ async def command_start(message: Message, state: FSMContext):
         reply_markup=welcome_keyboard(),
         parse_mode="Markdown",
     )
+
 
     if await ServiceDB.is_user_exist_by_tgid(message.from_user.id):
         await state.set_state(UserRoadmap.main_menu)

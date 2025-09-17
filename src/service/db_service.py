@@ -96,10 +96,10 @@ class ServiceDB:
         return (user.invites, user.invite_code)
 
     @staticmethod
-    async def add_user(tg_id: int):
+    async def add_user(tg_id: int, barcode: int):
         try:
             invite_token = ServiceDB.generate_invite_code(tg_id)
-            await UserORM.create_user(tg_id, 3, invite_token)
+            await UserORM.create_user(tg_id, 3, barcode, invite_token)
             print(f"Successfully created user {tg_id} with invite code")
         except Exception as e:
             print(f"Error creating user {tg_id}: {e}")
@@ -110,7 +110,7 @@ class ServiceDB:
         """Create the first user (admin) with unlimited invites"""
         try:
             invite_token = ServiceDB.generate_invite_code(tg_id)
-            await UserORM.create_user(tg_id, 999, invite_token)  # 999 invites for first user
+            await UserORM.create_user(tg_id, 999, 0, invite_token)  # 999 invites for first user
             print(f"Successfully created first user {tg_id} with 999 invites")
             return invite_token
         except Exception as e:
