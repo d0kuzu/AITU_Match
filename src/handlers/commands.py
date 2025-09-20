@@ -52,31 +52,31 @@ async def command_start(message: Message, state: FSMContext):
     # await state.set_state(StartStates.start)
 
 
-@commands_router.message(Command("init"))
-async def command_init(message: Message, state: FSMContext):
-    """Initialize the first user (admin)"""
-    if message.from_user.id != settings.ADMIN_ID:
-        await message.answer("Эта команда доступна только администратору.")
-        return
-    
-    try:
-        # Check if user already exists
-        if await ServiceDB.is_user_exist_by_tgid(message.from_user.id):
-            await message.answer("Пользователь уже существует!")
-            return
-            
-        # Create first user
-        invite_token = await ServiceDB.create_first_user(message.from_user.id)
-        await message.answer(
-            f"✅ Первый пользователь создан!\n\n"
-            f"Ваш инвайт-код: `{invite_token}`\n\n"
-            f"Теперь вы можете приглашать других пользователей!",
-            parse_mode="Markdown"
-        )
-        await state.set_state(UserRoadmap.main_menu)
-    except Exception as e:
-        print(f"Error creating first user: {e}")
-        await message.answer(f"Ошибка при создании первого пользователя: {e}")
+# @commands_router.message(Command("init"))
+# async def command_init(message: Message, state: FSMContext):
+#     """Initialize the first user (admin)"""
+#     if message.from_user.id != settings.ADMIN_ID:
+#         await message.answer("Эта команда доступна только администратору.")
+#         return
+#
+#     try:
+#         # Check if user already exists
+#         if await ServiceDB.is_user_exist_by_tgid(message.from_user.id):
+#             await message.answer("Пользователь уже существует!")
+#             return
+#
+#         # Create first user
+#         invite_token = await ServiceDB.create_first_user(message.from_user.id)
+#         await message.answer(
+#             f"✅ Первый пользователь создан!\n\n"
+#             f"Ваш инвайт-код: `{invite_token}`\n\n"
+#             f"Теперь вы можете приглашать других пользователей!",
+#             parse_mode="Markdown"
+#         )
+#         await state.set_state(UserRoadmap.main_menu)
+#     except Exception as e:
+#         print(f"Error creating first user: {e}")
+#         await message.answer(f"Ошибка при создании первого пользователя: {e}")
 
 
 @commands_router.message(Command("debug"))

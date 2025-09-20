@@ -39,6 +39,12 @@ class UserORM:
         async with session_maker() as session:
             result = await session.execute(select(User).filter(User.user_id == user_id))
             return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_user_by_barcode(barcode: int):
+        async with session_maker() as session:
+            result = await session.execute(select(User).filter(User.barcode == barcode))
+            return result.scalar_one_or_none()
         
     @staticmethod
     async def get_profile_by_id(profile_id: int):
@@ -224,6 +230,16 @@ class LikeORM:
         async with session_maker() as session:
             stmt = select(Like).where(
                 Like.liker_tgid == tg_id,
+                Like.is_accepted == True
+            )
+            result = await session.execute(stmt)
+            return result.scalars().all()
+
+    @staticmethod
+    async def get_all_accepted_likes_by_liked_tgid(tg_id: int):
+        async with session_maker() as session:
+            stmt = select(Like).where(
+                Like.liked_tgid == tg_id,
                 Like.is_accepted == True
             )
             result = await session.execute(stmt)

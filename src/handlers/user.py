@@ -23,7 +23,6 @@ from src.static.text.texts import (
     text_show_invite_code, text_go_to_deepseek, 
     text_no, text_yes,
     text_profile_create_begin,
-    get_invite_message,
     text_search_profiles_start,
 )
 
@@ -40,7 +39,7 @@ async def user_start(message: Message, state: FSMContext):
 async def user_get_token(message: Message, state: FSMContext):
     await state.set_state(UserRoadmap.check_token)
     await message.answer(
-        "Ты еще не зарегестрирован! Введи barcode и присоединяйся!",
+        "Ты еще не зарегестрирован! Введи свой barcode и присоединяйся!",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -48,7 +47,7 @@ async def user_get_token(message: Message, state: FSMContext):
 @user_router.message(UserRoadmap.check_token)
 async def user_check_token(message: Message, state: FSMContext):
     if message.text and message.text.isdigit():
-        if len(message.text) == 6:
+        if len(message.text) == 6 and not await ServiceDB.is_user_exist_by_barcode(int(message.text)):
             try:
                 await ServiceDB.add_user(message.from_user.id, int(message.text))
                 await state.set_state(UserRoadmap.main_menu)
@@ -60,27 +59,29 @@ async def user_check_token(message: Message, state: FSMContext):
                 print(f"Error during user registration: {e}")
                 await state.clear()
                 await message.answer("Произошла ошибка при регистрации. Попробуйте еще раз.")
+        elif len(message.text) == 6:
+            await message.answer("Этот barcode уже занят")
         else:
             await message.answer("Твой barcode неверен!")
     else:
         await message.answer("Barcode должен быть числом!")
 
 
-@user_router.message(UserRoadmap.main_menu, F.text == text_show_invite_code)
-async def user_show_invite_code(message: Message, state: FSMContext):
-    try:
-        invite_data = await ServiceDB.get_invite_info_by_tgid(message.from_user.id)
-        if invite_data and len(invite_data) == 2:
-            await message.answer(
-                get_invite_message(invite_data[0], invite_data[1]),
-                reply_markup=go_to_main_menu(),
-                parse_mode="Markdown",
-            )
-        else:
-            await message.answer("Произошло что-то странное... Щелк* Ты ничего не видел.")
-    except Exception as e:
-        print(f"Error getting invite info: {e}")
-        await message.answer("Произошла ошибка при получении инвайт-кода.")
+# @user_router.message(UserRoadmap.main_menu, F.text == text_show_invite_code)
+# async def user_show_invite_code(message: Message, state: FSMContext):
+#     try:
+#         invite_data = await ServiceDB.get_invite_info_by_tgid(message.from_user.id)
+#         if invite_data and len(invite_data) == 2:
+#             await message.answer(
+#                 get_invite_message(invite_data[0], invite_data[1]),
+#                 reply_markup=go_to_main_menu(),
+#                 parse_mode="Markdown",
+#             )
+#         else:
+#             await message.answer("Произошло что-то странное... Щелк* Ты ничего не видел.")
+#     except Exception as e:
+#         print(f"Error getting invite info: {e}")
+#         await message.answer("Произошла ошибка при получении инвайт-кода.")
 
 
 @user_router.message(UserRoadmap.main_menu, F.text == text_search_profiles)
@@ -167,7 +168,7 @@ async def user_message(message: Message, state: FSMContext):
         await state.set_state(UserRoadmap.main_menu)
     else:
         await message.answer(
-            "Сюда вход только по приглашению, ну-ка документики пожалуйста 🕵🏿‍♂️",
+            "Сюда вход только по barcode, ну-ка документики пожалуйста 🕵🏿‍♂️",
             reply_markup=go_to_check_token(),
         )
         await state.set_state(UserRoadmap.get_token)

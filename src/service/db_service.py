@@ -11,53 +11,53 @@ class ServiceDB:
     @staticmethod
     def generate_invite_code(tg_id: int):
         return jwt.encode({'sub': str(tg_id), 'random': randint(1,1000000000)}, settings.JWT_SECRET, algorithm="HS256")
-    
-    @staticmethod
-    async def is_valid_code(code: str):
-        try:
-            payload = dict(jwt.decode(code, settings.JWT_SECRET, algorithms=["HS256"]))
-        except jwt.exceptions.InvalidTokenError as e:
-            print(f"Invalid JWT token: {e}")
-            return False
-        
-        print(f"JWT payload: {payload}")
-        inviter_tgid = payload.get("sub")
 
-        if inviter_tgid is None:
-            print("No 'sub' field in JWT payload")
-            return False
-            
-        try:
-            inviter_tgid = int(inviter_tgid)
-        except (ValueError, TypeError):
-            print(f"Invalid tg_id in JWT payload: {inviter_tgid}")
-            return False
-
-        print(f"Looking for inviter with TG ID: {inviter_tgid}")
-        
-        user_data = await UserORM.get_user_by_tgid(inviter_tgid)
-        if user_data is None:
-            print(f"Inviter with TG ID {inviter_tgid} not found")
-            return False
-            
-        user = UserSchema.model_validate(user_data)
-        print(f"Current user data - invites: {user.invites}, invite_code: {user.invite_code}")
-        print(f"Comparing codes - stored: '{user.invite_code}' vs provided: '{code}'")
-        
-        if user.invite_code == code and user.invites > 0:
-            print(f"Valid invite code found for user {inviter_tgid}")
-            new_code = ServiceDB.generate_invite_code(inviter_tgid)
-            print(f"Generated new code: {new_code}")
-            success = await UserORM.update_invites_and_code_by_tgid(inviter_tgid, user.invites-1, new_code)
-            if success:
-                print(f"Successfully updated invites for user {inviter_tgid} - new invites: {user.invites-1}")
-                return True
-            else:
-                print(f"Failed to update invites for user {inviter_tgid}")
-                return False
-        else:
-            print(f"Invalid invite code - code matches: {user.invite_code == code}, invites left: {user.invites}")
-            return False
+    # @staticmethod
+    # async def is_valid_code(code: str):
+    #     try:
+    #         payload = dict(jwt.decode(code, settings.JWT_SECRET, algorithms=["HS256"]))
+    #     except jwt.exceptions.InvalidTokenError as e:
+    #         print(f"Invalid JWT token: {e}")
+    #         return False
+    #
+    #     print(f"JWT payload: {payload}")
+    #     inviter_tgid = payload.get("sub")
+    #
+    #     if inviter_tgid is None:
+    #         print("No 'sub' field in JWT payload")
+    #         return False
+    #
+    #     try:
+    #         inviter_tgid = int(inviter_tgid)
+    #     except (ValueError, TypeError):
+    #         print(f"Invalid tg_id in JWT payload: {inviter_tgid}")
+    #         return False
+    #
+    #     print(f"Looking for inviter with TG ID: {inviter_tgid}")
+    #
+    #     user_data = await UserORM.get_user_by_tgid(inviter_tgid)
+    #     if user_data is None:
+    #         print(f"Inviter with TG ID {inviter_tgid} not found")
+    #         return False
+    #
+    #     user = UserSchema.model_validate(user_data)
+    #     print(f"Current user data - invites: {user.invites}, invite_code: {user.invite_code}")
+    #     print(f"Comparing codes - stored: '{user.invite_code}' vs provided: '{code}'")
+    #
+    #     if user.invite_code == code and user.invites > 0:
+    #         print(f"Valid invite code found for user {inviter_tgid}")
+    #         new_code = ServiceDB.generate_invite_code(inviter_tgid)
+    #         print(f"Generated new code: {new_code}")
+    #         success = await UserORM.update_invites_and_code_by_tgid(inviter_tgid, user.invites-1, new_code)
+    #         if success:
+    #             print(f"Successfully updated invites for user {inviter_tgid} - new invites: {user.invites-1}")
+    #             return True
+    #         else:
+    #             print(f"Failed to update invites for user {inviter_tgid}")
+    #             return False
+    #     else:
+    #         print(f"Invalid invite code - code matches: {user.invite_code == code}, invites left: {user.invites}")
+    #         return False
 
     
     @staticmethod
@@ -71,6 +71,14 @@ class ServiceDB:
     @staticmethod
     async def is_user_exist_by_id(user_id: int) -> bool:
         user = await UserORM.get_user_by_id(user_id)
+
+        if user is None:
+            return False
+        return True
+
+    @staticmethod
+    async def is_user_exist_by_barcode(barcode: int) -> bool:
+        user = await UserORM.get_user_by_barcode(barcode)
 
         if user is None:
             return False
@@ -98,24 +106,23 @@ class ServiceDB:
     @staticmethod
     async def add_user(tg_id: int, barcode: int):
         try:
-            invite_token = ServiceDB.generate_invite_code(tg_id)
-            await UserORM.create_user(tg_id, 3, barcode, invite_token)
+            await UserORM.create_user(tg_id, 3, barcode, None)
             print(f"Successfully created user {tg_id} with invite code")
         except Exception as e:
             print(f"Error creating user {tg_id}: {e}")
             raise e
 
-    @staticmethod
-    async def create_first_user(tg_id: int):
-        """Create the first user (admin) with unlimited invites"""
-        try:
-            invite_token = ServiceDB.generate_invite_code(tg_id)
-            await UserORM.create_user(tg_id, 999, 0, invite_token)  # 999 invites for first user
-            print(f"Successfully created first user {tg_id} with 999 invites")
-            return invite_token
-        except Exception as e:
-            print(f"Error creating first user {tg_id}: {e}")
-            raise e
+    # @staticmethod
+    # async def create_first_user(tg_id: int):
+    #     """Create the first user (admin) with unlimited invites"""
+    #     try:
+    #         invite_token = ServiceDB.generate_invite_code(tg_id)
+    #         await UserORM.create_user(tg_id, 999, 0, invite_token)  # 999 invites for first user
+    #         print(f"Successfully created first user {tg_id} with 999 invites")
+    #         return invite_token
+    #     except Exception as e:
+    #         print(f"Error creating first user {tg_id}: {e}")
+    #         raise e
 
 
     @staticmethod
@@ -169,6 +176,7 @@ class ServiceDB:
     @staticmethod
     async def get_accepted_likes(liker_tgid: int) -> List[LikeSchema]:
         likes_data = await LikeORM.get_all_accepted_likes_by_liker_tgid(liker_tgid)
+        likes_data += await LikeORM.get_all_accepted_likes_by_liked_tgid(liker_tgid)
 
         if likes_data is None:
             return None
