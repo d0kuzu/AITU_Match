@@ -15,9 +15,6 @@ def view_likes_menu_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="Кто меня лайкнул 👀", callback_data="view_who_liked_me"),
-            ],
-            [
                 InlineKeyboardButton(text="Мои взаимные лайки ❤️", callback_data="view_my_mutual_likes"),
             ],
             [
@@ -36,9 +33,13 @@ def pending_like_action_keyboard(liker_tg_id: int) -> InlineKeyboardMarkup:
             ],
             [
                  InlineKeyboardButton(text="➡️ Следующий", callback_data="next_pending_like"), # Если их много
-            ],
-            [
-                InlineKeyboardButton(text="Меню лайков ☰", callback_data="back_to_view_likes_menu"),
             ]
+        ]
+    )
+
+def watch_likes_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Посмотреть", callback_data="view_who_liked_me")]
         ]
     )
