@@ -7,6 +7,7 @@ from aiogram.types import CallbackQuery, Message, FSInputFile
 
 from src.handlers.likes import get_telegram_username_or_name
 from src.keyboards.inline import view_likes_menu_keyboard, pending_like_action_keyboard
+from src.keyboards.reply import main_menu_keyboard
 from src.service.db_service import ServiceDB
 from src.service.schemas import LikeSchema, ProfileSchema
 from src.states import ViewLikesStates
@@ -39,7 +40,7 @@ async def show_next_pending_like_profile(target_message: Message, state: FSMCont
     current_index: int = data.get("current_pending_index", 0)
 
     if not pending_liker_ids or current_index >= len(pending_liker_ids):
-        await target_message.answer("Вы просмотрели все анкеты, которые вас лайкнули в этой сессии.", reply_markup=view_likes_menu_keyboard()) # TODO replace keyboard to menu
+        await target_message.answer("Вы просмотрели все анкеты, которые вас лайкнули на данный момент.", reply_markup=main_menu_keyboard())
         await state.clear()
         return
 
@@ -86,8 +87,11 @@ async def process_accept_pending_like(callback_query: CallbackQuery, state: FSMC
     liker_tg_id = int(liker_tg_id_str)
     current_user_tg_id = callback_query.from_user.id
 
+    await callback_query.message.delete()
+
     await ServiceDB.accept_like(liker_tg_id, current_user_tg_id)
-    await show_mutual_like(liker_tg_id, callback_query)
+    await show_mutual_like_for_liker(liker_tg_id, callback_query)
+    await show_mutual_like_for_answerer(liker_tg_id, callback_query)
 
     try:
         await callback_query.message.edit_reply_markup(reply_markup=None)
@@ -100,7 +104,7 @@ async def process_accept_pending_like(callback_query: CallbackQuery, state: FSMC
     await show_next_pending_like_profile(callback_query.message, state, bot)
 
 
-async def show_mutual_like(liker_tg_id: str | int, callback_query: CallbackQuery):
+async def show_mutual_like_for_liker(liker_tg_id: str | int, callback_query: CallbackQuery):
     try:
         profile_data: Optional[ProfileSchema] = await ServiceDB.get_profile_by_tgid(callback_query.from_user.id)
 
@@ -112,6 +116,32 @@ async def show_mutual_like(liker_tg_id: str | int, callback_query: CallbackQuery
             photo=profile_image,
             caption=(
                 f"Взаимная симпатия с: {profile_data.name}, {profile_data.age}\n"
+                f"Университет: {profile_data.uni}\n"
+                f"О себе: {profile_data.description}\n\n"
+                f"Связь: {telegram_user_info}"
+            )
+        )
+    except FileNotFoundError:
+        await callback_query.message.answer(
+            f"Не удалось загрузить фото для профиля {callback_query.from_user.username}")
+    except Exception as e:
+        await callback_query.message.answer(
+            f"Произошла ошибка при показе профиля {callback_query.from_user.username} Ошибка: {e}")
+        print(f"Error sending mutual like profile: {e}")
+
+
+async def show_mutual_like_for_answerer(liker_tg_id: str | int, callback_query: CallbackQuery):
+    try:
+        mutual_profile_tg_id = liker_tg_id
+        profile_data: Optional[ProfileSchema] = await ServiceDB.get_profile_by_tgid(mutual_profile_tg_id)
+
+        profile_image = FSInputFile(str(profile_data.s3_path))
+        telegram_user_info = await get_telegram_username_or_name(callback_query.bot, mutual_profile_tg_id)
+
+        await callback_query.message.answer_photo(
+            photo=profile_image,
+            caption=(
+                f"Вы ответили взаимностью - {profile_data.name}, {profile_data.age}\n"
                 f"Университет: {profile_data.uni}\n"
                 f"О себе: {profile_data.description}\n\n"
                 f"Связь: {telegram_user_info}"
