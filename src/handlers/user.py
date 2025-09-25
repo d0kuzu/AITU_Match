@@ -64,7 +64,7 @@ async def user_check_token(message: Message, state: FSMContext):
             else:
                 await message.answer("Этот barcode уже занят")
         elif len(message.text) == 6:
-            await message.answer("Этого barcode нет в базе")
+            await message.answer("Данный barcode отсутствует в базе (вероятнее всего вы не студент AITU)")
         else:
             await message.answer("Твой barcode неверен!")
     else:
