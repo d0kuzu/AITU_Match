@@ -6,6 +6,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 
 from src.config import settings
+from src.repository.queries import BarcodesORM
 from src.service.db_service import ServiceDB
 from src.states import SearchProfileStates, UserRoadmap, CreateProfileStates, EditProfileStates
 
@@ -47,20 +48,23 @@ async def user_get_token(message: Message, state: FSMContext):
 @user_router.message(UserRoadmap.check_token)
 async def user_check_token(message: Message, state: FSMContext):
     if message.text and message.text.isdigit():
-        if len(message.text) == 6 and not await ServiceDB.is_user_exist_by_barcode(int(message.text)):
-            try:
-                await ServiceDB.add_user(message.from_user.id, int(message.text))
-                await state.set_state(UserRoadmap.main_menu)
-                await message.answer(
-                    "Welcome to the club, buddy!",
-                    reply_markup=go_to_main_menu(),
-                )
-            except Exception as e:
-                print(f"Error during user registration: {e}")
-                await state.clear()
-                await message.answer("Произошла ошибка при регистрации. Попробуйте еще раз.")
+        if len(message.text) == 6 and await ServiceDB.is_barcode_in_base(int(message.text)):
+            if not await ServiceDB.is_user_exist_by_barcode(int(message.text)):
+                try:
+                    await ServiceDB.add_user(message.from_user.id, int(message.text))
+                    await state.set_state(UserRoadmap.main_menu)
+                    await message.answer(
+                        "Welcome to the club, buddy!",
+                        reply_markup=go_to_main_menu(),
+                    )
+                except Exception as e:
+                    print(f"Error during user registration: {e}")
+                    await state.clear()
+                    await message.answer("Произошла ошибка при регистрации. Попробуйте еще раз.")
+            else:
+                await message.answer("Этот barcode уже занят")
         elif len(message.text) == 6:
-            await message.answer("Этот barcode уже занят")
+            await message.answer("Данный barcode не разрешен")
         else:
             await message.answer("Твой barcode неверен!")
     else:

@@ -83,3 +83,8 @@ class Like(Base):
     __table_args__ = (
         UniqueConstraint("liker_tgid", "liked_tgid", name="uq_liker_liked"),
     )
+
+class Barcode(Base):
+    __tablename__ = "barcodes"
+
+    code: Mapped[int] = mapped_column(Integer, nullable=False, primary_key=True)

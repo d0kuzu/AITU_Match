@@ -3,7 +3,7 @@ import jwt
 from random import randint 
 
 from src.config import settings
-from src.repository.queries import AsyncORM, UserORM, ProfileORM, LikeORM
+from src.repository.queries import AsyncORM, UserORM, ProfileORM, LikeORM, BarcodesORM
 from src.service.schemas import UserSchema, ProfileSchema, ProfileCreateInternalSchema, LikeSchema
 
 
@@ -75,6 +75,10 @@ class ServiceDB:
         if user is None:
             return False
         return True
+
+    @staticmethod
+    async def is_barcode_in_base(barcode: int) -> bool:
+        return await BarcodesORM.check_if_barcode_exist(barcode)
 
     @staticmethod
     async def is_user_exist_by_barcode(barcode: int) -> bool:

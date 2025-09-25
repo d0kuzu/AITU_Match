@@ -2,7 +2,7 @@ from sqlalchemy import func, text, select, update
 from sqlalchemy.exc import IntegrityError
 
 from src.repository.database import engine, Base, session_maker
-from src.repository.models import User, Profile, Like # noqa: F401
+from src.repository.models import User, Profile, Like, Barcode  # noqa: F401
 from src.service.schemas import ProfileCreateInternalSchema
 
 
@@ -17,7 +17,7 @@ class AsyncORM:
     @staticmethod
     async def create_tables():
         async with engine.begin() as conn:
-            # await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
 
 class UserORM:
@@ -264,3 +264,16 @@ class LikeORM:
             await session.commit()
 
             return True
+
+class BarcodesORM:
+    @staticmethod
+    async def check_if_barcode_exist(code: int) -> bool:
+        async with session_maker() as session:
+            like = await session.execute(
+                select(Barcode).where(
+                    Barcode.code == code
+                )
+            )
+            like = like.scalar_one_or_none()
+
+            return like is not None
