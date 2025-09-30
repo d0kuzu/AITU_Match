@@ -35,6 +35,8 @@ text_profile_create_begin = """
 Вводи на них ответы и бот 🤖 запомнит твои данные...
 """
 
+save_photos = "Сохранить фото"
+
 
 def get_invite_message(available_invites: int, invite_code: str) -> str:
     message = f"""

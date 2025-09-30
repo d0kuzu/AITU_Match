@@ -58,7 +58,6 @@ async def show_next_pending_like_profile(target_message: Message, state: FSMCont
                 caption=(
                     f"Вам симпатизирует: {profile_data.name}, {profile_data.age} лет, {profile_data.uni}\n"
                     f"{profile_data.description}\n\n"
-                    f"Telegram: {telegram_user_info}"
                 ),
                 reply_markup=pending_like_action_keyboard(liker_tg_id=liker_tg_id_to_show)
             )

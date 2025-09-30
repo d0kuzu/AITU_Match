@@ -3,7 +3,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from src.static.text.texts import (
     text_search_profiles, text_edit_profile,
     text_show_invite_code, text_go_to_deepseek,
-    text_yes, text_no, text_male, text_female, text_my_likes
+    text_yes, text_no, text_male, text_female, text_my_likes, save_photos
 )
 
 
@@ -79,6 +79,15 @@ def main_menu_keyboard() -> ReplyKeyboardMarkup:
             [KeyboardButton(text=text_search_profiles)],
             [KeyboardButton(text=text_edit_profile)],
             [KeyboardButton(text=text_go_to_deepseek)],
+        ],
+        resize_keyboard=True,
+    )
+
+
+def photo_collect() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text=save_photos)],
         ],
         resize_keyboard=True,
     )

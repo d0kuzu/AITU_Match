@@ -114,12 +114,19 @@ async def user_create_profile(message: Message, state: FSMContext):
 
 @user_router.message(UserRoadmap.main_menu, F.text == text_go_to_deepseek)
 async def user_start_chat_with_ai(message: Message, state: FSMContext):
-    llm_message = await llm_init_agent()
-    await message.answer(
-        llm_message,
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    await state.set_state(UserRoadmap.llm_chat)
+    if await ServiceDB.is_profile_exist_by_tgid(message.from_user.id):
+        llm_message = await llm_init_agent()
+        await message.answer(
+            llm_message,
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        await state.set_state(UserRoadmap.llm_chat)
+    else:
+        await message.answer(
+            "Ты еще не создал свою анкету, создать?",
+            reply_markup=yes_or_no_keyboard()
+        )
+
 
 
 @user_router.message(UserRoadmap.llm_chat)
@@ -146,11 +153,17 @@ async def user_chat_with_ai(message: Message, state: FSMContext):
 
 @user_router.message(UserRoadmap.main_menu, F.text == text_edit_profile)
 async def user_start_edit_profile(message: Message, state: FSMContext):
-    await message.answer(
-        "Ну что же, давай отредактируем твою анкету",
-        reply_markup=welcome_keyboard(),
-    )
-    await state.set_state(EditProfileStates.start)
+    if await ServiceDB.is_profile_exist_by_tgid(message.from_user.id):
+        await message.answer(
+            "Ну что же, давай отредактируем твою анкету",
+            reply_markup=welcome_keyboard(),
+        )
+        await state.set_state(EditProfileStates.start)
+    else:
+        await message.answer(
+            "Ты еще не создал свою анкету, создать?",
+            reply_markup=yes_or_no_keyboard()
+        )
 
 
 @user_router.message(UserRoadmap.main_menu)

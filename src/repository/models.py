@@ -58,7 +58,7 @@ class Profile(Base):
         Boolean, nullable=True, server_default=text("true")
     )
 
-    s3_path: Mapped[Str1024] = mapped_column(nullable=False, unique=True)
+    s3_path: Mapped[Str1024] = mapped_column(nullable=False)
 
     created_at: Mapped[created_at_type]
     modified_at: Mapped[modified_at_type]

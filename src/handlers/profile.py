@@ -1,16 +1,17 @@
+import json
 from pathlib import Path
 
 from aiogram import F, Bot
 from aiogram import Router
-from aiogram.types import Message, ReplyKeyboardRemove, FSInputFile
+from aiogram.types import Message, ReplyKeyboardRemove, FSInputFile, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
 
 from src.states import UserRoadmap, CreateProfileStates
-from src.keyboards.reply import sex_selection_horizontal_keyboard, main_menu_keyboard
+from src.keyboards.reply import sex_selection_horizontal_keyboard, main_menu_keyboard, photo_collect
 from src.service.db_service import ServiceDB
 from src.service.schemas import ProfileCreateInternalSchema
-from src.static.text.texts import text_male, text_female
-
+from src.static.text import texts
+from src.static.text.texts import text_male, text_female, text_main_menu
 
 profile_router = Router()
 
@@ -114,47 +115,83 @@ async def profile_university(message: Message, state: FSMContext):
 async def profile_description(message: Message, state: FSMContext):
     await state.update_data(description=message.text)
     await message.answer(
-        f"Последний этап! Отправь фото для своей анкеты.",
+        f"Последний этап! Отправь фото для своей анкеты. Ты можешь прикрепить до 3х фото.",
         reply_markup=ReplyKeyboardRemove(),
     )
     await state.set_state(CreateProfileStates.photo)
 
 
+@profile_router.message(CreateProfileStates.photo, F.text == texts.save_photos)
+async def save_profile_photos(message: Message, state: FSMContext):
+    data = await state.get_value("photos", [])
+
+    s3paths = []
+    if len(data) >= 1:
+        for i, msg in enumerate(data):
+            dest_path = UPLOAD_DIR / f"{message.from_user.id}_N{i + 1}.jpg"
+            await message.bot.download(msg, destination=dest_path)
+            s3paths.append(str(dest_path))
+    elif len(data) == 1:
+        dest_path = UPLOAD_DIR / f"{message.from_user.id}.jpg"
+        await message.bot.download(data[-1], destination=dest_path)
+        s3paths.append(str(dest_path))
+    else:
+        await message.answer("Нужно отравитьхотябы одно фото")
+        return
+
+    data = await state.get_data()
+    profile = ProfileCreateInternalSchema(
+        tg_id=message.from_user.id,
+        name=data["name"],
+        age=data["age"],
+        sex=data["sex"],
+        uni=data["uni"],
+        description=data["description"],
+        s3_path=json.dumps(s3paths),
+    )
+
+    await ServiceDB.add_profile(profile)
+
+    if len(s3paths) > 1:
+        profile_images = []
+        for i, dest_path in enumerate(s3paths):
+            file = FSInputFile(str(dest_path))
+            profile_images.append(InputMediaPhoto(media=file,
+                                                  caption=f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}" if i==0 else None,
+                                                  ))
+        await message.answer_media_group(
+            profile_images,
+            parse_mode="Markdown",
+        )
+
+    else:
+        file = FSInputFile(str(s3paths[0]))
+        await message.answer_photo(
+            file,
+            caption=f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}",
+            parse_mode="Markdown",
+        )
+
+    await state.set_state(UserRoadmap.main_menu)
+    await message.answer(
+        "Вернемся в меню! \n" + text_main_menu,
+        reply_markup=main_menu_keyboard(),
+    )
+
+
 @profile_router.message(CreateProfileStates.photo)
-async def profile_photo(message: Message, state: FSMContext, bot: Bot):
+async def profile_photo(message: Message, state: FSMContext):
     if not message.photo:
         await message.answer(
             f"Вряд ли это фотка! Попробуй еще раз",
             reply_markup=ReplyKeyboardRemove(),
         )
     else:
-        photo_size = message.photo[-1]
-        dest_path = UPLOAD_DIR / (str(message.from_user.id) + ".jpg")
-        
-        await bot.download(
-            photo_size,
-            destination=dest_path
-        )
-        data = await state.get_data()
-        profile = ProfileCreateInternalSchema(
-            tg_id=message.from_user.id,
-            name=data["name"],
-            age=data["age"],
-            sex=data["sex"],
-            uni=data["uni"],
-            description=data["description"],
-            s3_path=str(dest_path),
-        )
+        data = await state.get_value("photos", [])
+        data.append(message.photo[-1].file_id)
+        await state.update_data(photos=data)
+        await message.answer(f"Загружено {len(data)}/3", reply_markup=photo_collect())
 
-        await ServiceDB.add_profile(profile)
-
-        profile_image = FSInputFile(str(dest_path))
-
-        await message.answer_photo(
-            photo=profile_image,
-            caption=f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}",
-            reply_markup=main_menu_keyboard(),
-            parse_mode="Markdown",
-        )
-
-        await state.set_state(UserRoadmap.main_menu)
+        if len(data) >= 3:
+            await message.answer("Сохрняем эти фото", reply_markup=ReplyKeyboardRemove())
+            await save_profile_photos(message, state)
