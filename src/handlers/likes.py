@@ -8,7 +8,7 @@ from aiogram.exceptions import TelegramBadRequest
 
 from src.service.db_service import ServiceDB
 from src.keyboards.reply import main_menu_keyboard
-from src.keyboards.inline import view_likes_menu_keyboard, pending_like_action_keyboard
+from src.keyboards.inline import view_likes_menu_keyboard
 from src.states import ViewLikesStates, UserRoadmap
 from src.service.schemas import ProfileSchema, LikeSchema
 
@@ -43,7 +43,7 @@ async def my_likes_menu_entry(message: Message, state: FSMContext):
     )
 
 
-@likes_router.callback_query(ViewLikesStates.choose_view_type, F.data == "view_my_mutual_likes")
+@likes_router.callback_query(ViewLikesStates.choose_view_type, F.photos == "view_my_mutual_likes")
 async def process_view_my_mutual_likes(callback_query: CallbackQuery, state: FSMContext, bot: Bot):
     await callback_query.answer()
     user_tg_id = callback_query.from_user.id
@@ -89,7 +89,7 @@ async def process_view_my_mutual_likes(callback_query: CallbackQuery, state: FSM
     await state.set_state(ViewLikesStates.choose_view_type)
 
 
-@likes_router.callback_query(F.data.in_({"likes_to_main_menu", "back_to_view_likes_menu"}))
+@likes_router.callback_query(F.photos.in_({"likes_to_main_menu", "back_to_view_likes_menu"}))
 async def process_back_buttons_likes(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
     action = callback_query.data

@@ -29,7 +29,7 @@ async def main():
     bot = Bot(token=settings.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
 
-    dp.include_routers(commands_router, profile_router, search_router, edit_router, likes_router, user_router, pending_router)
+    dp.include_routers(pending_router, commands_router, profile_router, search_router, edit_router, likes_router, user_router)
     
     await dp.start_polling(bot)
 

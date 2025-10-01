@@ -91,3 +91,26 @@ def photo_collect() -> ReplyKeyboardMarkup:
         ],
         resize_keyboard=True,
     )
+
+
+def profile_action_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[
+                KeyboardButton(text="♥️"),
+                KeyboardButton(text="👎"),
+                KeyboardButton(text="💤")
+        ]]
+    )
+
+def pending_like_action_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text="Лайкнуть в ответ ❤️"),
+                KeyboardButton(text="Отклонить 👎"),
+            ],
+            [
+                 KeyboardButton(text="➡️ Следующий"),
+            ]
+        ]
+    )

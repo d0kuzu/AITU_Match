@@ -1,16 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-def profile_action_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[[
-                InlineKeyboardButton(text="♥️", callback_data="like"),
-                InlineKeyboardButton(text="👎", callback_data="next"),
-                InlineKeyboardButton(text="💤", callback_data="main_menu")
-        ]]
-    )
-
-
 def view_likes_menu_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
@@ -23,19 +13,6 @@ def view_likes_menu_keyboard() -> InlineKeyboardMarkup:
         ]
     )
 
-
-def pending_like_action_keyboard(liker_tg_id: int) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text="Лайкнуть в ответ ❤️", callback_data=f"accept_pending_like:{liker_tg_id}"),
-                InlineKeyboardButton(text="Отклонить 👎", callback_data=f"reject_pending_like:{liker_tg_id}"),
-            ],
-            [
-                 InlineKeyboardButton(text="➡️ Следующий", callback_data="next_pending_like"), # Если их много
-            ]
-        ]
-    )
 
 def watch_likes_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(

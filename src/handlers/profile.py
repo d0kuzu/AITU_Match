@@ -6,6 +6,7 @@ from aiogram import Router
 from aiogram.types import Message, ReplyKeyboardRemove, FSInputFile, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
 
+from src.service.send_photo import send_photos
 from src.states import UserRoadmap, CreateProfileStates
 from src.keyboards.reply import sex_selection_horizontal_keyboard, main_menu_keyboard, photo_collect
 from src.service.db_service import ServiceDB
@@ -136,7 +137,7 @@ async def save_profile_photos(message: Message, state: FSMContext):
         await message.bot.download(data[-1], destination=dest_path)
         s3paths.append(str(dest_path))
     else:
-        await message.answer("Нужно отравитьхотябы одно фото")
+        await message.answer("Нужно отравить хотябы одно фото")
         return
 
     data = await state.get_data()
@@ -152,25 +153,7 @@ async def save_profile_photos(message: Message, state: FSMContext):
 
     await ServiceDB.add_profile(profile)
 
-    if len(s3paths) > 1:
-        profile_images = []
-        for i, dest_path in enumerate(s3paths):
-            file = FSInputFile(str(dest_path))
-            profile_images.append(InputMediaPhoto(media=file,
-                                                  caption=f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}" if i==0 else None,
-                                                  ))
-        await message.answer_media_group(
-            profile_images,
-            parse_mode="Markdown",
-        )
-
-    else:
-        file = FSInputFile(str(s3paths[0]))
-        await message.answer_photo(
-            file,
-            caption=f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}",
-            parse_mode="Markdown",
-        )
+    await send_photos(message, s3paths, f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}")
 
     await state.set_state(UserRoadmap.main_menu)
     await message.answer(

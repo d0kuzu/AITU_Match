@@ -1,16 +1,19 @@
+import json
 from pathlib import Path
 
 from aiogram import F, Bot, Router
-from aiogram.types import Message, FSInputFile, KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import Message, FSInputFile, KeyboardButton, ReplyKeyboardMarkup, InputMediaPhoto, \
+    ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 
 from src.repository.types import SexEnum
+from src.service.send_photo import send_photos
 from src.states import UserRoadmap, EditProfileStates
-from src.keyboards.reply import main_menu_keyboard
+from src.keyboards.reply import main_menu_keyboard, photo_collect
 from src.service.db_service import ServiceDB
 from src.service.schemas import ProfileCreateInternalSchema
-from src.static.text.texts import text_male, text_female
-
+from src.static.text import texts
+from src.static.text.texts import text_male, text_female, text_main_menu
 
 edit_router = Router()
 
@@ -96,7 +99,7 @@ async def edit_profile_age(message: Message, state: FSMContext):
     
     updated_data = await state.get_data()
     await message.answer(
-        f"Возраст обновлен на: {updated_data['age']}. Текущий пол: {"мужской" if data['original_sex'] == SexEnum.MALE else "женский"}. Выберите новый или оставьте как есть.",
+        f"Возраст обновлен на: {updated_data['age']}. Текущий пол: {"Мужской" if data['original_sex'] == SexEnum.MALE else "Женский"}. Выберите новый или оставьте как есть.",
         reply_markup=sex_selection_horizontal_keyboard_with_skip()
     )
     await state.set_state(EditProfileStates.sex)
@@ -115,7 +118,7 @@ async def edit_profile_sex(message: Message, state: FSMContext):
 
     updated_data = await state.get_data()
     await message.answer(
-        f"Пол обновлен на: {"мужской" if updated_data['sex'] == SexEnum.MALE else "женский"}. Текущая специальность: {data['original_uni']}. Введите новую или оставьте как есть.",
+        f"Пол обновлен на: {"Мужской" if updated_data['sex'] == SexEnum.MALE else "Женский"}. Текущая специальность: {data['original_uni']}. Введите новую или оставьте как есть.",
         reply_markup=skip_keyboard()
     )
     await state.set_state(EditProfileStates.university)
@@ -156,45 +159,37 @@ async def edit_profile_description(message: Message, state: FSMContext):
     
     updated_data = await state.get_data()
     await message.answer(
-        f"Описание обновлено. Текущее фото: (отправлю его следующим сообщением, если есть).\nОтправьте новое фото или нажмите 'Оставить как есть'.",
+        f"Описание обновлено. Текущие фото: (отправлю их следующим сообщением).\nОтправьте новые фото (до 3х) или нажмите 'Оставить как есть'.",
         reply_markup=skip_keyboard()
     )
-    if data.get("original_s3_path") and Path(data["original_s3_path"]).exists():
-        try:
-            original_photo = FSInputFile(data["original_s3_path"])
-            await message.answer_photo(photo=original_photo, caption="Текущее фото.")
-        except Exception as e:
-            print(f"Error sending original photo: {e}")
-            await message.answer("Не удалось загрузить текущее фото.")
+
+    if data.get("original_s3_path"):
+        s3Paths = json.loads(data["original_s3_path"])
+
+        await send_photos(message, s3Paths, "Текущие фото")
 
     await state.set_state(EditProfileStates.photo)
 
 
-@edit_router.message(EditProfileStates.photo)
-async def edit_profile_photo(message: Message, state: FSMContext, bot: Bot):
+@edit_router.message(EditProfileStates.photo, F.text == texts.save_photos)
+async def edit_profile_photo(message: Message, state: FSMContext, is_skipped=False):
     data = await state.get_data()
-    final_s3_path = data["original_s3_path"]
+    photos = data.get("photos", [])
 
-    if message.text == TEXT_SKIP_BUTTON:
-        pass
-    elif not message.photo:
-        await message.answer("Это не фото. Отправьте фото или оставьте старое.", reply_markup=skip_keyboard())
-        return
-    else:
-        photo_size = message.photo[-1]
-        new_dest_path = UPLOAD_DIR_EDIT / (str(message.from_user.id) + ".jpg")
-        
-        try:
-            await bot.download(
-                photo_size,
-                destination=new_dest_path
-            )
-            final_s3_path = str(new_dest_path)
-        except Exception as e:
-            await message.answer("Не удалось загрузить новое фото. Будет использовано старое, если оно есть.")
-            print(f"Error downloading new photo: {e}")
+    s3paths = []
+    if len(photos) >= 1:
+        for i, msg in enumerate(photos):
+            dest_path = UPLOAD_DIR_EDIT / f"{message.from_user.id}_N{i + 1}.jpg"
+            await message.bot.download(msg, destination=dest_path)
+            s3paths.append(str(dest_path))
+    elif len(photos) == 1:
+        dest_path = UPLOAD_DIR_EDIT / f"{message.from_user.id}.jpg"
+        await message.bot.download(photos[-1], destination=dest_path)
+        s3paths.append(str(dest_path))
+    if is_skipped:
+        s3paths = json.loads(data.get("original_s3_path"))
 
-    await state.update_data(s3_path=final_s3_path)
+    await state.update_data(s3_path=json.dumps(s3paths))
     
     updated_data = await state.get_data()
 
@@ -220,20 +215,17 @@ async def edit_profile_photo(message: Message, state: FSMContext, bot: Bot):
         f"Анкета обновлена!\n"
         f"Имя: {profile_update_schema.name}\n"
         f"Возраст: {profile_update_schema.age}\n"
-        f"Пол: {"мужской" if profile_update_schema.sex == SexEnum.MALE else "женский"}\n"
+        f"Пол: {"Мужской" if profile_update_schema.sex == SexEnum.MALE else "Женский"}\n"
         f"Специальность: {profile_update_schema.uni}\n"
         f"Описание: {profile_update_schema.description}"
     )
 
-    if updated_data["s3_path"] and Path(updated_data["s3_path"]).exists():
+    if updated_data["s3_path"]:
         try:
-            final_profile_image = FSInputFile(updated_data["s3_path"])
-            await message.answer_photo(
-                photo=final_profile_image,
-                caption=caption_text,
-                reply_markup=main_menu_keyboard(),
-                parse_mode="Markdown",
-            )
+            s3Paths = json.loads(updated_data["s3_path"])
+            print(s3Paths)
+
+            await send_photos(message, s3Paths, caption_text)
         except Exception as e:
             print(f"Error sending final photo: {e}")
             await message.answer(caption_text + "\n\n(Не удалось загрузить фото для показа)", reply_markup=main_menu_keyboard())
@@ -243,3 +235,28 @@ async def edit_profile_photo(message: Message, state: FSMContext, bot: Bot):
 
     await state.clear()
     await state.set_state(UserRoadmap.main_menu)
+    await message.answer(
+        "Вернемся в меню! \n" + text_main_menu,
+        reply_markup=main_menu_keyboard(),
+    )
+
+
+@edit_router.message(EditProfileStates.photo)
+async def profile_photo(message: Message, state: FSMContext):
+    if message.text == TEXT_SKIP_BUTTON:
+        await edit_profile_photo(message, state, True)
+
+    if not message.photo:
+        await message.answer(
+            "Это не фото. Отправьте фото или оставьте старое.",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+    else:
+        data = await state.get_value("photos", [])
+        data.append(message.photo[-1].file_id)
+        await state.update_data(photos=data)
+        await message.answer(f"Загружено {len(data)}/3", reply_markup=photo_collect())
+
+        if len(data) >= 3:
+            await message.answer("Сохрняем эти фото", reply_markup=ReplyKeyboardRemove())
+            await edit_profile_photo(message, state, False)
