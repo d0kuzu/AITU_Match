@@ -99,7 +99,8 @@ def profile_action_keyboard() -> ReplyKeyboardMarkup:
                 KeyboardButton(text="♥️"),
                 KeyboardButton(text="👎"),
                 KeyboardButton(text="💤")
-        ]]
+        ]],
+        resize_keyboard=True,
     )
 
 def pending_like_action_keyboard() -> ReplyKeyboardMarkup:
@@ -112,5 +113,6 @@ def pending_like_action_keyboard() -> ReplyKeyboardMarkup:
             [
                  KeyboardButton(text="➡️ Следующий"),
             ]
-        ]
+        ],
+        resize_keyboard=True,
     )

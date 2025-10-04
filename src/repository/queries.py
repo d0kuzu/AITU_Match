@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.repository.database import engine, Base, session_maker
 from src.repository.models import User, Profile, Like, Barcode  # noqa: F401
-from src.service.schemas import ProfileCreateInternalSchema
+from src.service.schemas import ProfileCreateInternalSchema, LikeSchema
 
 
 class AsyncORM:
@@ -17,7 +17,7 @@ class AsyncORM:
     @staticmethod
     async def create_tables():
         async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
+            # await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
 
 class UserORM:
@@ -129,10 +129,11 @@ class ProfileORM:
                 return False
     
     @staticmethod
-    async def get_random_profile_except_tgid(curr_user_tgid: int) -> Profile | None:
+    async def get_random_profile_except_tgid_and_likes(curr_user_tgid: int, ids: list) -> Profile | None:
         async with session_maker() as session:
             stmt = select(Profile).where(
-                Profile.tg_id != curr_user_tgid
+                Profile.tg_id != curr_user_tgid,
+                Profile.tg_id.notin_(ids),
             ).order_by(
                 func.random()
             ).limit(1)
@@ -207,7 +208,7 @@ class LikeORM:
     async def get_likes_by_liker_tgid(tg_id: int):
         async with session_maker() as session:
             result = await session.execute(select(Like).filter(Like.liker_tgid == tg_id))
-            return result.all()
+            return result.scalars().all()
         
     @staticmethod
     async def get_likes_by_liked_tgid(tg_id: int):

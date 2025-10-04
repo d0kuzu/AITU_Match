@@ -1,5 +1,4 @@
 from typing import List
-import jwt
 from random import randint 
 
 from src.config import settings
@@ -8,10 +7,6 @@ from src.service.schemas import UserSchema, ProfileSchema, ProfileCreateInternal
 
 
 class ServiceDB:
-    @staticmethod
-    def generate_invite_code(tg_id: int):
-        return jwt.encode({'sub': str(tg_id), 'random': randint(1,1000000000)}, settings.JWT_SECRET, algorithm="HS256")
-
     # @staticmethod
     # async def is_valid_code(code: str):
     #     try:
@@ -146,7 +141,12 @@ class ServiceDB:
 
     @staticmethod
     async def search_profile(curr_user_tgid: int) -> ProfileSchema:
-        profile = await ProfileORM.get_random_profile_except_tgid(curr_user_tgid)
+        likes_by_liker = await LikeORM.get_likes_by_liker_tgid(curr_user_tgid)
+        likes_by_liked = await LikeORM.get_likes_by_liked_tgid(curr_user_tgid)
+        likes = (likes_by_liker or []) + (likes_by_liked or [])
+        print(likes)
+        ids = [i.liked_tgid if i.liked_tgid != curr_user_tgid else i.liker_tgid for i in likes] if likes else []
+        profile = await ProfileORM.get_random_profile_except_tgid_and_likes(curr_user_tgid, ids)
         return ProfileSchema.model_validate(profile) if profile else None
     
     @staticmethod
