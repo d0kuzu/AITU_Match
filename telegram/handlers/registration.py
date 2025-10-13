@@ -1,28 +1,25 @@
 import asyncio
 import logging
-from datetime import datetime
 
 from aiogram import Router, F
 from aiogram.enums import ChatAction, ParseMode
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, FSInputFile
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config import env
-from database.repo import UserRepo, user_repo
-from telegram.callbacks.registration_callbacks import CallbackData, LIFE_AREAS, TestCallbackData, HeldOutCallbackData, \
+from config.config import env
+from database.repo import UserRepo
+from telegram.callbacks.registration_callbacks import CallbackData, LIFE_AREAS, HeldOutCallbackData, \
     HeldOutCallbackDayValues, HeldOutCallbackEmotionsValues, HeldOutCallbackCommentValues, HeldOutCallbackValues, \
     SurveyCallbackData, SurveyUsabilityValues, SurveyMotivationValues, SurveyRecommendationValues, \
     SurveyReachGoalValues, SurveyTestValues
 from services.openai import generate_goal_plan, ask_question
-from telegram.filters.role import NonAdminFilter
 from telegram.misc import texts
 from telegram.misc.keyboards import Keyboards
-from telegram.misc.states import RegisterState, GoalState, SurveyState, RestartState, SettingsState, TestState, \
-    AdviceState, QuestionState
-from telegram.misc.texts import ADVICE_PROMPT, MOTIVATION_PROMPT, start_project_message, start_message, \
-    registration_start_message, weeks, days, registration_end_message, held_out_yes, held_out_no, \
+from telegram.misc.states import RegisterState, GoalState, SurveyState, RestartState, QuestionState
+from telegram.misc.texts import start_message, \
+    registration_end_message, held_out_yes, held_out_no, \
     held_out_emotions_question, held_out_comment_question, held_out_question, GOAL_CORRECTION_PROMPT, \
     before_registration
 from urllib.parse import parse_qs

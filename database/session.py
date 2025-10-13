@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, async_sessionmaker
-from config import env
+from config.config import env
 
 engine: AsyncEngine = create_async_engine(env.asyncpg_url, echo=True)
 

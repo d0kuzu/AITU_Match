@@ -1,18 +1,15 @@
-from datetime import datetime, time, timedelta, date
+from datetime import datetime, date
 from io import BytesIO
 
 from aiogram.types import BufferedInputFile
 from sqlalchemy.dialects.postgresql import insert as pginsert
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update, insert, func, exists, text, cast, Integer, delete, literal
-import json
+from sqlalchemy import update, insert, func, exists
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from sqlalchemy.orm import selectinload
 
-from config import env
 from database.models.daily_question_answer import DailyQuestionResponse
 from database.models.held_out_answers import HeldOutAnswer
 from database.repo.repo import Repo

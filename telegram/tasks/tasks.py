@@ -2,23 +2,17 @@ import logging
 
 from aiogram import Bot
 from aiogram.enums import ParseMode
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.base import StorageKey
-from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config import env
+from config.config import env
 from database.repo import UserRepo
-from datetime import time, datetime
 
 from services.openai import ask_question
 from telegram.callbacks.registration_callbacks import CallbackData
 from telegram.misc import texts
 from telegram.misc.keyboards import Keyboards
-from telegram.misc.states import QuestionState
-from telegram.misc.texts import days, weeks, DAILY_TASK_PROMPT, AFFIRMATION_TASK_PROMPT, QUESTION_TASK_PROMPT, \
-    held_out_day_question, survey_intro
+from telegram.misc.texts import DAILY_TASK_PROMPT, AFFIRMATION_TASK_PROMPT, held_out_day_question, survey_intro
 
 
 async def generate_task(bot: Bot, user_repo: UserRepo):
