@@ -10,12 +10,12 @@ from .base import Base
 class Profile(Base):
     __tablename__ = "profiles"
 
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"), primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     age: Mapped[int] = mapped_column(Integer, nullable=False)
     sex: Mapped[SexEnum] = mapped_column(Enum(SexEnum), nullable=False)
     uni: Mapped[UniEnum] = mapped_column(Enum(UniEnum), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"), primary_key=True)
 
     s3_path: Mapped[str] = mapped_column(String, nullable=False)
 

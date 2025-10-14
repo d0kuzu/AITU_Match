@@ -1,24 +1,29 @@
 from aiogram import Dispatcher, Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from config.config import Environ
 from database import repo
 from database.session import get_db
 from telegram.handlers import registration, admin
+from telegram.middlewares.env_middleware import EnvMiddleware
 from telegram.middlewares.repo_middleware import RepoMiddleware
 from telegram.middlewares.scheduler_middleware import SchedulerMiddleware
 
 class TgRegister:
-    def __init__(self, dp: Dispatcher, scheduler: AsyncIOScheduler, bot: Bot):
-        self.user_repo = None
+    def __init__(self, dp: Dispatcher, bot: Bot):
 
         self.dp = dp
-        self.scheduler = scheduler
         self.bot = bot
 
-        self.bot.user_repo = None
+        self.user_repo = None
+        self.scheduler = None
+        self.env = None
 
     async def register(self):
         await self._create_repos()
+        self._create_scheduler()
+        self._create_env()
+
         self._register_handlers()
         self._register_middlewares()
         self._register_tasks()
@@ -27,6 +32,15 @@ class TgRegister:
         async with get_db() as session:
             self.user_repo = repo.UserRepo(session)
 
+    def _create_scheduler(self):
+        scheduler = AsyncIOScheduler(timezone=None)
+        scheduler.start()
+        self.scheduler = scheduler
+
+    def _create_env(self):
+        env = Environ()
+        self.env = env
+
     def _register_handlers(self):
         self.dp.include_routers(registration.router)
         self.dp.include_routers(admin.router)
@@ -34,6 +48,7 @@ class TgRegister:
     def _register_middlewares(self):
         repo_middleware = RepoMiddleware(self.user_repo)
         scheduler_middleware = SchedulerMiddleware(self.scheduler)
+        env_middleware = EnvMiddleware(self.env)
 
         self.dp.callback_query.middleware(repo_middleware)
         self.dp.message.middleware(repo_middleware)
@@ -42,6 +57,10 @@ class TgRegister:
         self.dp.callback_query.middleware(scheduler_middleware)
         self.dp.message.middleware(scheduler_middleware)
         self.dp.inline_query.middleware(scheduler_middleware)
+
+        self.dp.callback_query.middleware(env_middleware)
+        self.dp.message.middleware(env_middleware)
+        self.dp.inline_query.middleware(env_middleware)
 
     def _register_tasks(self):
         ### OLD STRUCTURE ###

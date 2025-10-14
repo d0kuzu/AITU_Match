@@ -30,10 +30,8 @@ async def start():
     await bot.set_my_commands([
         BotCommand(command='start', description='Начать!')
     ])
-    scheduler = AsyncIOScheduler(timezone=None)
-    scheduler.start()
 
-    tg_register = TgRegister(dp, scheduler, bot)
+    tg_register = TgRegister(dp, bot)
     await tg_register.register()
 
     await dp.start_polling(bot, on_startup=on_startup, on_shutdown=on_shutdown)
