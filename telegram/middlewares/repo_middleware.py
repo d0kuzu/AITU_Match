@@ -8,9 +8,6 @@ from database.session import get_db
 
 
 class RepoMiddleware(BaseMiddleware):
-    def __init__(self, user_repo: Repo):
-        self.user_repo = user_repo
-
     async def __call__(
             self,
             handler: Callable[
@@ -18,7 +15,8 @@ class RepoMiddleware(BaseMiddleware):
             event: TelegramObject,
             data: Dict[str, Any]
     ) -> Any:
+        async with get_db() as session:
+            user_repo = repo.UserRepo(session)
+        data["user_repo"] = user_repo
 
-            data["user_repo"] = self.user_repo
-
-            return await handler(event, data)
+        return await handler(event, data)

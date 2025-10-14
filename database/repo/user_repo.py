@@ -22,6 +22,22 @@ class UserRepo(Repo):
         super().__init__(session)
 
 
+    async def is_exist(self, user_id) -> bool:
+        try:
+            async with self.session.begin() as session:
+                smt = (
+                    select(User).
+                    where(User.user_id == user_id)
+                )
+                result = await session.execute(smt)
+                user = result.scalar_one_or_none()
+                return user is not None
+        except Exception as e:
+            logging.error(f"user_repo.is_exist error: {e}")
+
+
+
+
     async def get_user(self, user_id: int) -> User|None:
         try:
             async with self.session.begin():

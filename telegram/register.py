@@ -15,22 +15,16 @@ class TgRegister:
         self.dp = dp
         self.bot = bot
 
-        self.user_repo = None
         self.scheduler = None
         self.env = None
 
     async def register(self):
-        await self._create_repos()
         self._create_scheduler()
         self._create_env()
 
         self._register_handlers()
         self._register_middlewares()
         self._register_tasks()
-
-    async def _create_repos(self):
-        async with get_db() as session:
-            self.user_repo = repo.UserRepo(session)
 
     def _create_scheduler(self):
         scheduler = AsyncIOScheduler(timezone=None)
@@ -46,7 +40,7 @@ class TgRegister:
         self.dp.include_routers(registration.router)
 
     def _register_middlewares(self):
-        repo_middleware = RepoMiddleware(self.user_repo)
+        repo_middleware = RepoMiddleware()
         scheduler_middleware = SchedulerMiddleware(self.scheduler)
         env_middleware = EnvMiddleware(self.env)
 
