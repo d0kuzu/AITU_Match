@@ -3,6 +3,7 @@ from io import BytesIO
 
 from aiogram.types import BufferedInputFile
 from sqlalchemy.dialects.postgresql import insert as pginsert
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update, insert, func, exists
 import logging
@@ -18,22 +19,19 @@ import pandas as pd
 
 
 class UserRepo(Repo):
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         super().__init__(session)
 
 
-    async def is_exist(self, user_id) -> bool:
+    async def is_exist(self, user_id: int) -> bool:
         try:
-            async with self.session.begin() as session:
-                smt = (
-                    select(User).
-                    where(User.user_id == user_id)
-                )
-                result = await session.execute(smt)
-                user = result.scalar_one_or_none()
-                return user is not None
+            stmt = select(User).where(User.user_id == user_id)
+            result = await self.session.execute(stmt)
+            user = result.scalar_one_or_none()
+            return user is not None
         except Exception as e:
             logging.error(f"user_repo.is_exist error: {e}")
+            return False
 
 
 
