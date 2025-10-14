@@ -42,8 +42,8 @@ class TgRegister:
         self.env = env
 
     def _register_handlers(self):
-        self.dp.include_routers(registration.router)
         self.dp.include_routers(admin.router)
+        self.dp.include_routers(registration.router)
 
     def _register_middlewares(self):
         repo_middleware = RepoMiddleware(self.user_repo)

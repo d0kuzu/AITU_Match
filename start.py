@@ -5,9 +5,7 @@ import coloredlogs
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from config import env
 from database.main import init_db, close_db
 from telegram.register import TgRegister
 
