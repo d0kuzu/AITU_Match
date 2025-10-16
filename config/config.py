@@ -1,26 +1,45 @@
+from dataclasses import dataclass
+from pathlib import Path
+
 from environs import Env
 
 
+env = Env()
+if Path(".env").exists():
+    env.read_env(".env")
+
+
+@dataclass(frozen=True)
+class DatabaseConfig:
+    host: str = env.str("DB_HOST")
+    port: int = env.int("DB_PORT")
+    user: str = env.str("DB_USER")
+    password: str = env.str("DB_PASSWORD")
+    dbname: str = env.str("DB_NAME")
+
+    @property
+    def psycopg_url(self) -> str:
+        return (
+            f"postgresql+psycopg2://{self.user}:{self.password}"
+            f"@{self.host}:{self.port}/{self.dbname}"
+        )
+
+    @property
+    def asyncpg_url(self) -> str:
+        return (
+            f"postgresql+asyncpg://{self.user}:{self.password}"
+            f"@{self.host}:{self.port}/{self.dbname}"
+        )
+
+
+@dataclass(frozen=True)
+class BotConfig:
+    token: str = env.str("BOT_TOKEN")
+    logging_level: int = env.int("LOGGING_LEVEL")
+    admin_ids: set[int] = (7278477437,)
+
+
+@dataclass(frozen=True)
 class Environ:
-    def __init__(self):
-        env = Env()
-        env.read_env(".env")
-        self.host = env.str("DB_HOST")
-        self.port = env.str("DB_PORT")
-        self.user = env.str("DB_USER")
-        self.password = env.str("DB_PASSWORD")
-        self.dbname = env.str("DB_NAME")
-        self.bot_token = env.str("BOT_TOKEN")
-        self.logging_level = env.int("LOGGING_LEVEL")
-
-        self.ADMIN_IDS = {7278477437}
-
-    @property
-    def psycopg_url(self):
-        return f"postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.dbname}"
-
-    @property
-    def asyncpg_url(self):
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.dbname}"
-
-env = Environ()
+    db: DatabaseConfig = DatabaseConfig()
+    bot: BotConfig = BotConfig()
