@@ -34,6 +34,25 @@ class UserRepo(Repo):
             return False
 
 
+    async def create(self, user_id: int, user_data: Dict[str, Any]) -> bool:
+        try:
+            async with self.session.begin():
+                user = User(
+                    user_id=user_id,
+                    name=user_data.get("name", ""),
+                    age=user_data.get("age", 0),
+                    addiction=user_data.get("addiction", ""),
+                    motivation=user_data.get("motivation", ""),
+                    progress=1
+                )
+
+                await self.session.merge(user)
+            logging.info(f"Данные пользователя сохранены: {user_data}, user_id: {user_id}")
+            return True
+        except Exception as e:
+            logging.error(f"Ошибка при сохранении данных пользователя: {e}")
+            return False
+
 
 
     async def get_user(self, user_id: int) -> User|None:
@@ -65,29 +84,6 @@ class UserRepo(Repo):
         except Exception as e:
             logging.error(f"Ошибка при получении пользователя: {e}")
             return None
-
-
-    async def add_message(self, user_id: int, message_id: int) -> bool:
-        try:
-            async with self.session.begin():
-                stmt = pginsert(Chat).values(
-                    user_id=user_id,
-                    history=[str(message_id)]
-                    # или используйте пустой список, если не хотите вставлять начальную историю
-                )
-
-                # Если запись с таким user_id уже существует, обновляем поле history, добавляя новый message_id
-                stmt = stmt.on_conflict_do_update(
-                    index_elements=[Chat.user_id],  # Индекс или уникальный ключ, по которому проверяется наличие записи
-                    set_={
-                        "history": Chat.history.concat([str(message_id)])  # Добавляем новый message_id в history
-                    }
-                )
-                await self.session.execute(stmt)
-            return True
-        except Exception as e:
-            logging.error(f"Ошибка при проверке пользователя: {e}")
-            return False
 
 
     async def check_user(self, user_id: int) -> tuple[bool, bool]:

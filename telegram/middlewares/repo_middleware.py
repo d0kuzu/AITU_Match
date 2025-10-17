@@ -17,6 +17,9 @@ class RepoMiddleware(BaseMiddleware):
     ) -> Any:
         async with get_db() as session:
             user_repo = repo.UserRepo(session)
-        data["user_repo"] = user_repo
+            profile_repo = repo.ProfileRepo(session)
 
-        return await handler(event, data)
+            data["user_repo"] = user_repo
+            data["profile_repo"] = profile_repo
+
+            return await handler(event, data)

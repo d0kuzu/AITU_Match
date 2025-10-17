@@ -6,6 +6,7 @@ from pathlib import Path
 class Paths:
     _BASE_DIR: Path = Path(__file__).resolve().parent
     _bot_photo_dir: Path = _BASE_DIR / "media" / "bot"
+    user_photo_dir: Path = _BASE_DIR / "media" / "user"
 
     welcome_photo = _bot_photo_dir / "welcome.jpg"
 

@@ -1,0 +1,1 @@
+specializations = ["SE", "MT", "CB", "BDA", "MCS", "BDH", "CS", "SST", "ST", "DT", "DPA", "AB", "IE", "IM", "DTNPE", "IIT", "EE"]
