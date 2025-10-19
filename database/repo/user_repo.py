@@ -34,23 +34,30 @@ class UserRepo(Repo):
             return False
 
 
-    async def create(self, user_id: int, user_data: Dict[str, Any]) -> bool:
+    async def is_exist_by_barcode(self, barcode: str) -> bool:
+        try:
+            stmt = select(User).where(User.barcode == barcode)
+            result = await self.session.execute(stmt)
+            user = result.scalar_one_or_none()
+            return user is not None
+        except Exception as e:
+            logging.error(f"user_repo.is_exist_by_barcode error: {e}")
+            return False
+
+
+    async def create(self, user_id: int, barcode) -> bool:
         try:
             async with self.session.begin():
                 user = User(
                     user_id=user_id,
-                    name=user_data.get("name", ""),
-                    age=user_data.get("age", 0),
-                    addiction=user_data.get("addiction", ""),
-                    motivation=user_data.get("motivation", ""),
-                    progress=1
+                    barcode=barcode
                 )
 
                 await self.session.merge(user)
-            logging.info(f"Данные пользователя сохранены: {user_data}, user_id: {user_id}")
+            logging.info(f"User ({user_id}) saved")
             return True
         except Exception as e:
-            logging.error(f"Ошибка при сохранении данных пользователя: {e}")
+            logging.error(f"user_repo.create error: {e}")
             return False
 
 

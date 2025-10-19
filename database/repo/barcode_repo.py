@@ -12,12 +12,11 @@ class BarcodeRepo(Repo):
         super().__init__(session)
 
 
-    async def is_exist(self, code: int) -> bool:
+    async def is_exist(self, code: str) -> bool:
         try:
             stmt = (
                 select(Barcode)
-                    .where(Barcode.code == code,
-                           Barcode.user_id.is_(None))
+                    .where(Barcode.code == code)
             )
             result = await self.session.execute(stmt)
             barcode = result.scalar_one_or_none()

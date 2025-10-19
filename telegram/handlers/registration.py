@@ -48,15 +48,15 @@ async def user_barcode(message: Message, state: FSMContext):
 @router.message(WelcomeStatesGroup.wait_barcode)
 async def wait_user_barcode(message: Message, state: FSMContext, repos: Repos):
     if message.text and message.text.isdigit():
-        if len(message.text) == 6 and await ServiceDB.is_barcode_in_base(int(message.text)):
-            if not await ServiceDB.is_user_exist_by_barcode(int(message.text)):
+        if len(message.text) == 6 and await repos.barcode.is_exist(message.text):
+            if not await repos.user.is_user_exist_by_barcode(message.text):
                 try:
-                    await ServiceDB.add_user(message.from_user.id, int(message.text))
-                    await state.set_state(UserRoadmap.main_menu)
-                    await message.answer(
-                        "Welcome to the club, buddy!",
-                        reply_markup=go_to_main_menu(),
-                    )
+                    await repos.user.create(message.from_user.id, int(message.text))
+
+                    await state.set_state(WelcomeStatesGroup.welcome)
+                    await message.answer("Welcome to the club, buddy!")
+                    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
+                    await asyncio.sleep(2)
                 except Exception as e:
                     print(f"Error during user registration: {e}")
                     await state.clear()
@@ -69,8 +69,6 @@ async def wait_user_barcode(message: Message, state: FSMContext, repos: Repos):
             await message.answer("Твой barcode неверен!")
     else:
         await message.answer("Barcode должен быть числом!")
-
-    await state.set_state(WelcomeStatesGroup.welcome)
 
 
 @router.message(WelcomeStatesGroup.welcome)
