@@ -7,6 +7,6 @@ class Barcode(Base):
     __tablename__ = "barcodes"
 
     code: Mapped[str] = mapped_column(String, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="user", cascade="all, delete-orphan")

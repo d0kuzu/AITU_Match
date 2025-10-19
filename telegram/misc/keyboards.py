@@ -42,3 +42,10 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.profile_texts.profile_create_opposite_sex_both)
         builder.adjust(3)
         return builder.as_markup()
+
+    @staticmethod
+    def save_photos():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.profile_texts.profile_create_photo_save)
+        builder.adjust(1)
+        return builder.as_markup()

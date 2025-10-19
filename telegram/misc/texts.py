@@ -24,6 +24,7 @@ _Нажми *"Начать"*, чтобы создать свою анкету и
 
     ┗━ *Выбирай кнопку ниже* ━┛
     """
+    ask_barcode: str = "Ты еще не зарегестрирован! Введи свой barcode и присоединяйся!"
 
 
 @dataclass(frozen=True)
@@ -57,7 +58,8 @@ class ProfileTexts:
     profile_create_description = "Напиши о себе: хобби, интересы и увлечения"
 
     profile_create_photo = "Последний этап! Отправь фото для своей анкеты. Ты можешь прикрепить до 3х фото."
-    profile_create_amount = "Нужно отравить хотябы одно фото"
+    profile_create_photo_amount = "Нужно отравить хотябы одно фото"
+    profile_create_photo_save = "Сохранить фото"
 
 
 @dataclass(frozen=True)

@@ -2,6 +2,8 @@ from aiogram.fsm.state import State, StatesGroup
 
 
 class WelcomeStatesGroup(StatesGroup):
+    ask_barcode = State()
+    wait_barcode = State()
     welcome = State()
 
 

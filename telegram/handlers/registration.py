@@ -9,7 +9,7 @@ from aiogram.types import Message, FSInputFile, ReplyKeyboardRemove
 
 from config.config import Environ
 from database.models.profile import Profile
-from database.repo import UserRepo, ProfileRepo
+from database.repo import UserRepo, ProfileRepo, Repos
 from services.telegram.send_photos import send_photos
 from telegram.filters.registration import RegisteredFilter
 from telegram.misc.consts import specializations
@@ -31,15 +31,50 @@ async def command_start(message: Message, state: FSMContext):
         parse_mode="Markdown",
     )
 
+    await state.set_state(WelcomeStatesGroup.ask_barcode)
+
+
+@router.message(WelcomeStatesGroup.ask_barcode)
+async def user_barcode(message: Message, state: FSMContext):
+    await message.answer(TEXTS.welcome_texts.text_main_menu)
+    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
+    await asyncio.sleep(1)
+
+    await message.answer(TEXTS.welcome_texts.ask_barcode)
+
+    await state.set_state(WelcomeStatesGroup.wait_barcode)
+
+
+@router.message(WelcomeStatesGroup.wait_barcode)
+async def wait_user_barcode(message: Message, state: FSMContext, repos: Repos):
+    if message.text and message.text.isdigit():
+        if len(message.text) == 6 and await ServiceDB.is_barcode_in_base(int(message.text)):
+            if not await ServiceDB.is_user_exist_by_barcode(int(message.text)):
+                try:
+                    await ServiceDB.add_user(message.from_user.id, int(message.text))
+                    await state.set_state(UserRoadmap.main_menu)
+                    await message.answer(
+                        "Welcome to the club, buddy!",
+                        reply_markup=go_to_main_menu(),
+                    )
+                except Exception as e:
+                    print(f"Error during user registration: {e}")
+                    await state.clear()
+                    await message.answer("Произошла ошибка при регистрации. Попробуйте еще раз.")
+            else:
+                await message.answer("Этот barcode уже занят")
+        elif len(message.text) == 6:
+            await message.answer("Данный barcode отсутствует в базе (вероятнее всего вы не студент AITU)")
+        else:
+            await message.answer("Твой barcode неверен!")
+    else:
+        await message.answer("Barcode должен быть числом!")
+
     await state.set_state(WelcomeStatesGroup.welcome)
 
 
 @router.message(WelcomeStatesGroup.welcome)
 async def profile_create_start(message: Message, state: FSMContext):
-    await message.answer(TEXTS.welcome_texts.text_main_menu)
-    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
-    await asyncio.sleep(2)
-
     await message.answer(TEXTS.profile_texts.start_profile_create)
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
     await asyncio.sleep(2)
@@ -165,8 +200,8 @@ async def profile_description(message: Message, state: FSMContext):
     await state.set_state(CreateProfileStates.photo)
 
 
-@router.message(CreateProfileStates.photo, F.text == texts.save_photos)
-async def save_profile_photos(message: Message, state: FSMContext, profile_repo: ProfileRepo):
+@router.message(CreateProfileStates.photo, F.text == TEXTS.profile_texts.profile_create_photo_save)
+async def save_profile_photos(message: Message, state: FSMContext, repos: Repos):
     data = await state.get_value("photos", [])
 
     s3paths = []
@@ -180,12 +215,12 @@ async def save_profile_photos(message: Message, state: FSMContext, profile_repo:
         await message.bot.download(data[-1], destination=dest_path)
         s3paths.append(str(dest_path))
     else:
-        await message.answer(TEXTS.profile_texts.profile_create_amount)
+        await message.answer(TEXTS.profile_texts.profile_create_photo_amount)
         return
 
     data = await state.get_data()
 
-    profile = await profile_repo.create(message.from_user.id, data, s3paths)
+    profile = await repos.profile.create(message.from_user.id, data, s3paths)
 
     await send_photos(message, s3paths, f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}")
 
@@ -194,3 +229,21 @@ async def save_profile_photos(message: Message, state: FSMContext, profile_repo:
     #     "Вернемся в меню! \n" + text_main_menu,
     #     reply_markup=main_menu_keyboard(),
     # )
+
+
+@router.message(CreateProfileStates.photo)
+async def profile_photo(message: Message, state: FSMContext):
+    if not message.photo:
+        await message.answer(
+            f"Вряд ли это фотка! Попробуй еще раз",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+    else:
+        data = await state.get_value("photos", [])
+        data.append(message.photo[-1].file_id)
+        await state.update_data(photos=data)
+        await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
+
+        if len(data) >= 3:
+            await message.answer("Сохрняем эти фото", reply_markup=ReplyKeyboardRemove())
+            await save_profile_photos(message, state)
