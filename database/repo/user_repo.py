@@ -30,7 +30,7 @@ class UserRepo(Repo):
             user = result.scalar_one_or_none()
             return user is not None
         except Exception as e:
-            logging.error(f"user_repo.is_exist error: {e}")
+            logging.error(f"user_repo.is_exist error {user_id}: {e}")
             return False
 
 
@@ -41,7 +41,7 @@ class UserRepo(Repo):
             user = result.scalar_one_or_none()
             return user is not None
         except Exception as e:
-            logging.error(f"user_repo.is_exist_by_barcode error: {e}")
+            logging.error(f"user_repo.is_exist_by_barcode error {barcode}: {e}")
             return False
 
 
@@ -57,7 +57,7 @@ class UserRepo(Repo):
             logging.info(f"User ({user_id}) saved")
             return True
         except Exception as e:
-            logging.error(f"user_repo.create error: {e}")
+            logging.error(f"user_repo.create error {user_id}: {e}")
             return False
 
 

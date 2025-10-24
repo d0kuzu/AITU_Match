@@ -9,13 +9,14 @@ from telegram.misc.texts import TEXTS
 
 
 class InlineKeyboards:
-    @staticmethod
-    def test_buttons():
-        builder = InlineKeyboardBuilder()
-        builder.button(text="✅ Да", callback_data=TestCallbackData.yes)
-        builder.button(text="❌ Нет", callback_data=TestCallbackData.no)
-        builder.adjust(2)
-        return builder.as_markup()
+    # @staticmethod
+    # def test_buttons():
+    #     builder = InlineKeyboardBuilder()
+    #     builder.button(text="✅ Да", callback_data=TestCallbackData.yes)
+    #     builder.button(text="❌ Нет", callback_data=TestCallbackData.no)
+    #     builder.adjust(2)
+    #     return builder.as_markup()
+    pass
 
 
 class ReplyKeyboards:
@@ -48,4 +49,22 @@ class ReplyKeyboards:
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.profile_texts.profile_create_photo_save)
         builder.adjust(1)
+        return builder.as_markup()
+
+    @staticmethod
+    def main_menu():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.menu_texts.search_profiles_text)
+        builder.button(text=TEXTS.menu_texts.edit_profile_text)
+        builder.button(text=TEXTS.menu_texts.go_to_deepseek_text)
+        builder.adjust(3)
+        return builder.as_markup()
+
+    @staticmethod
+    def profiles_search_actions():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.search_profiles_texts.like)
+        builder.button(text=TEXTS.search_profiles_texts.skip)
+        builder.button(text=TEXTS.search_profiles_texts.leave)
+        builder.adjust(3)
         return builder.as_markup()

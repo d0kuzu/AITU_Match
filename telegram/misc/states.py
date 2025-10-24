@@ -16,3 +16,12 @@ class CreateProfileStates(StatesGroup):
     university = State()
     description = State()
     photo = State()
+
+
+class SearchProfilesStates(StatesGroup):
+    start = State()
+
+
+class MenuStates(StatesGroup):
+    main_menu = State()
+

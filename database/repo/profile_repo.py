@@ -12,10 +12,11 @@ class ProfileRepo(Repo):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
 
+
     async def create(self, user_id: int, user_data: dict[str, any], s3paths: list[str]) -> Profile|None:
         try:
             async with self.session.begin():
-                profile = Profile(
+                stmt = Profile(
                     user_id=user_id,
                     name=user_data["name"],
                     age=user_data["age"],
@@ -26,9 +27,25 @@ class ProfileRepo(Repo):
                     s3_path=json.dumps(s3paths),
                 )
 
-                profile = await self.session.merge(profile)
+                profile = await self.session.merge(stmt)
             logging.info(f"Данные пользователя сохранены: {user_data}, user_id: {user_id}")
             return profile
         except Exception as e:
-            logging.error(f"Ошибка при сохранении данных пользователя {user_id}: {e}")
+            logging.error(f"profile_repo.create error {user_id}: {e}")
             return None
+
+
+    async def search_by_user_id(self, user_id: int) -> Profile|None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    select(Profile)
+                    .where(Profile.user_id == user_id)
+                )
+                result = await self.session.execute(stmt)
+                profile = result.scalar_one_or_none()
+            return profile
+        except Exception as e:
+            logging.error(f"profile_repo.search_by_user_id error {user_id}: {e}")
+            return None
+

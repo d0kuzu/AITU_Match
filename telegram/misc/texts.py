@@ -60,12 +60,30 @@ class ProfileTexts:
     profile_create_photo = "Последний этап! Отправь фото для своей анкеты. Ты можешь прикрепить до 3х фото."
     profile_create_photo_amount = "Нужно отравить хотябы одно фото"
     profile_create_photo_save = "Сохранить фото"
+    profile_create_photo_error = "Вряд ли это фотка! Попробуй еще раз"
+    profile_create_photo_saving = "Сохрняем эти фото"
+
+
+@dataclass(frozen=True)
+class MenuTexts:
+    search_profiles_text: str = "Смотреть анкеты 🔎"
+    edit_profile_text: str = "Редактировать свою анкету 🪞"
+    go_to_deepseek_text: str = "Мне никто не пишет. . ."
+
+
+@dataclass(frozen=True)
+class SearchProfilesTexts:
+    like: str = "♥️"
+    skip: str = "👎"
+    leave: str = "💤"
 
 
 @dataclass(frozen=True)
 class Texts:
     welcome_texts: WelcomeTexts = WelcomeTexts()
+    menu_texts: MenuTexts = MenuTexts()
     profile_texts: ProfileTexts = ProfileTexts()
+    search_profiles_texts: SearchProfilesTexts = SearchProfilesTexts()
 
 
 TEXTS: Texts = Texts()

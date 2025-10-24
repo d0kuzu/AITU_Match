@@ -22,5 +22,5 @@ class BarcodeRepo(Repo):
             barcode = result.scalar_one_or_none()
             return barcode is not None
         except Exception as e:
-            logging.error(f"barcode_repo.is_exist error: {e}")
+            logging.error(f"barcode_repo.is_exist error {code}: {e}")
             return False
