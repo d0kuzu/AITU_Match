@@ -7,10 +7,6 @@ from database.models import Base
 class Like(Base):
     __tablename__ = "likes"
 
-    __table_args__ = (
-        UniqueConstraint("liker_tgid", "liked_tgid", name="uq_liker_liked"),
-    )
-
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     liker_user_id: Mapped[str] = mapped_column(BigInteger, ForeignKey("users.tg_id"), nullable=False)

@@ -49,3 +49,22 @@ class ProfileRepo(Repo):
             logging.error(f"profile_repo.search_by_user_id error {user_id}: {e}")
             return None
 
+    async def search_random_user(self, user_id: int) -> Profile|None:
+        try:
+            async with self.session.begin():
+                subq = (
+                    select(Action.action_owner).where(Action.action_owner == user_id or Action.action_target == user_id)
+                )
+                stmt = (
+                    select(Profile)
+                    .where(Profile.user_id.notin_(subq))
+                    .limit(1)
+                )
+
+                result = await self.session.execute(stmt)
+                profile = result.scalar_one_or_none()
+
+                return profile
+        except Exception as e:
+            print(f"profile_repo.search_random_user error {user_id}: {e}")
+
