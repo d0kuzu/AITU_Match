@@ -73,9 +73,13 @@ class MenuTexts:
 
 @dataclass(frozen=True)
 class SearchProfilesTexts:
-    like: str = "♥️"
+    like: str = "❤️"
+    message: str = "💌"
     skip: str = "👎"
     leave: str = "💤"
+    start_search: str = "Начинаем поиск анкет..."
+    messaged_for_liked = "Тебя лайкнули, хочешь узнать кто это?"
+    see_who_liked = "Посмотреть"
 
 
 @dataclass(frozen=True)

@@ -7,7 +7,4 @@ class User(Base):
     __tablename__ = "users"
 
     user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    barcode: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=True)
-
-    profile: Mapped["Profile"] = relationship(back_populates="user", cascade="all, delete-orphan")
-    barcode: Mapped["Barcode"] = relationship(back_populates="user", cascade="all, delete-orphan")
+    barcode: Mapped[int] = mapped_column(ForeignKey("barcodes.code"), nullable=True)

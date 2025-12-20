@@ -21,5 +21,3 @@ class Profile(Base):
     s3_path: Mapped[str] = mapped_column(String, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
-
-    user: Mapped["User"] = relationship(back_populates="profile", cascade="all, delete-orphan")

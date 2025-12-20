@@ -19,7 +19,7 @@ class CreateProfileStates(StatesGroup):
 
 
 class SearchProfilesStates(StatesGroup):
-    start = State()
+    viewing_profile = State()
 
 
 class MenuStates(StatesGroup):

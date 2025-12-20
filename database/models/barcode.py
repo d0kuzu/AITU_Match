@@ -7,5 +7,3 @@ class Barcode(Base):
     __tablename__ = "barcodes"
 
     code: Mapped[str] = mapped_column(String, primary_key=True)
-
-    user: Mapped["User"] = relationship(back_populates="barcode", cascade="all, delete-orphan")

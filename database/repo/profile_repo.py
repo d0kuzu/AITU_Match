@@ -30,7 +30,6 @@ class ProfileRepo(Repo):
                 )
 
                 profile = await self.session.merge(stmt)
-            logging.info(f"Данные пользователя сохранены: {user_data}, user_id: {user_id}")
             return profile
         except Exception as e:
             logging.error(f"profile_repo.create error {user_id}: {e}")
@@ -51,32 +50,32 @@ class ProfileRepo(Repo):
             logging.error(f"profile_repo.search_by_user_id error {user_id}: {e}")
             return None
 
+
     async def get_sex_info(self, user_id: int) -> tuple[SexEnum, SexEnum] | None:
         try:
             async with self.session.begin():
                 stmt = (
                     select(Profile.sex, Profile.opposite_sex)
-                    .where(Profile.userid == user_id)
+                    .where(Profile.user_id == user_id)
                 ).limit(1)
 
+                result = await self.session.execute(stmt)
                 row = result.one_or_none()
-
-                if row is None:
-                    return None
 
                 return row
         except Exception as e:
             print(f"profile_repo.get_sex_info error {user_id}: {e}")
 
+
     async def search_random_user(self, user_id: int, user_sex:SexEnum, opposite_sex: SexEnum) -> Profile|None:
         try:
             async with self.session.begin():
                 subq = (
-                    select(Action.action_target)
+                    select(Action.target_id)
                     .where(
                         or_(
-                            Action.action_owner == user_id,
-                            Action.action_target == user_id
+                            Action.user_id == user_id,
+                            Action.target_id == user_id
                         )
                     )
                 )

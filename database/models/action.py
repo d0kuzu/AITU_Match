@@ -1,15 +1,22 @@
-from sqlalchemy import Integer, ForeignKey, BigInteger, Boolean, text, UniqueConstraint
+from sqlalchemy import Integer, ForeignKey, BigInteger, Boolean, text, UniqueConstraint, Enum, Index, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
+from config.enums import ActionEnum
 from database.models import Base
 
 
 class Action(Base):
     __tablename__ = "actions"
 
-    like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
 
-    action_owner: Mapped[str] = mapped_column(BigInteger, ForeignKey("users.tg_id"), nullable=False)
-    action_target: Mapped[str] = mapped_column(BigInteger, ForeignKey("users.tg_id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.tg_id"), nullable=False)
+    target_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.tg_id"), nullable=False)
+    action_type: Mapped[ActionEnum] = mapped_column(Enum(ActionEnum), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=True)
 
-    action_type: Mapped[str] = mapped_column(Text, nullable=False)
+    __table_args__ = (
+        Index("idx_user_id", "user_id"),
+        Index("idx_target_user_id", "target_id"),
+        Index("idx_user_target", "user_id", "target_id", unique=True),
+    )
