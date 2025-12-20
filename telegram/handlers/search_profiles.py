@@ -18,6 +18,23 @@ router = Router()
 router.message.filter(RegisteredFilter())
 
 
+@router.message(MenuStates.main_menu, F.text == TEXTS.menu_texts.search_profiles_text)
+async def start_profiles_search(message: Message, state: FSMContext, repos: Repos):
+    await state.clear()
+
+    result = await repos.profile.get_sex_info(message.from_user.id)
+
+    if result is None:
+        await message.answer(TEXTS.error_texts.internal_error)
+        return
+
+    sex, opposite_sex = result
+    await state.update_data(sex=sex, opposite_sex=opposite_sex)
+
+    await message.answer("Начинаем поиск анкет...", reply_markup=ReplyKeyboards.profiles_search_actions())
+    await send_next_profile(message, state, repos)
+
+
 async def send_next_profile(message: Message, state: FSMContext, repos: Repos):
     data = await state.get_data()
     profile = await repos.profile.search_random_user(message.from_user.id, data.get("sex"), data.get("opposite_sex"))
@@ -49,20 +66,3 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos):
         )
         await state.set_state(MenuStates.main_menu)
         await show_menu(message)
-
-
-@router.message(MenuStates.main_menu, F.text == TEXTS.menu_texts.search_profiles_text)
-async def start_profiles_search(message: Message, state: FSMContext, repos: Repos):
-    await state.clear()
-
-    result = await repos.profile.get_sex_info(message.from_user.id)
-
-    if result is None:
-        await message.answer(TEXTS.error_texts.internal_error)
-        return
-
-    sex, opposite_sex = result
-    await state.update_data(sex=sex, opposite_sex=opposite_sex)
-
-    await message.answer("Начинаем поиск анкет...", reply_markup=ReplyKeyboards.profiles_search_actions())
-    await send_next_profile(message, state, repos)
