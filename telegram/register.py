@@ -47,20 +47,19 @@ class TgRegister:
         env_middleware = EnvMiddleware(self.env)
         last_activity_middleware = LastActivityMiddleware()
 
-        self.dp.callback_query.middleware(LastActivityMiddleware)
-        self.dp.message.middleware(LastActivityMiddleware)
-        self.dp.inline_query.middleware(LastActivityMiddleware)
-
+        self.dp.callback_query.middleware(last_activity_middleware)
         self.dp.callback_query.middleware(repo_middleware)
-        self.dp.message.middleware(repo_middleware)
-        self.dp.inline_query.middleware(repo_middleware)
-
         self.dp.callback_query.middleware(scheduler_middleware)
-        self.dp.message.middleware(scheduler_middleware)
-        self.dp.inline_query.middleware(scheduler_middleware)
-
         self.dp.callback_query.middleware(env_middleware)
+
+        self.dp.message.middleware(last_activity_middleware)
+        self.dp.message.middleware(repo_middleware)
+        self.dp.message.middleware(scheduler_middleware)
         self.dp.message.middleware(env_middleware)
+
+        self.dp.inline_query.middleware(last_activity_middleware)
+        self.dp.inline_query.middleware(repo_middleware)
+        self.dp.inline_query.middleware(scheduler_middleware)
         self.dp.inline_query.middleware(env_middleware)
 
     def _register_tasks(self):
