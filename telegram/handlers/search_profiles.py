@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import Message
 
-from config.enums import SexEnum, ActionEnum
+from config.enums import ActionEnum
 from database.repo import Repos
 from services.helpers.send_photos import send_photos
 from telegram.filters.registration import RegisteredFilter

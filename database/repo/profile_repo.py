@@ -1,10 +1,10 @@
 import json
 import logging
 
-from sqlalchemy import select, or_, and_
+from sqlalchemy import select, or_, and_, true
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config.enums import SexEnum
+from config.enums import SexEnum, OppositeSexEnum
 from database.models.action import Action
 from database.models.profile import Profile
 from database.repo.repo import Repo
@@ -51,7 +51,7 @@ class ProfileRepo(Repo):
             return None
 
 
-    async def get_sex_info(self, user_id: int) -> tuple[SexEnum, SexEnum] | None:
+    async def get_sex_info(self, user_id: int) -> tuple[SexEnum, OppositeSexEnum] | None:
         try:
             async with self.session.begin():
                 stmt = (
@@ -67,7 +67,7 @@ class ProfileRepo(Repo):
             print(f"profile_repo.get_sex_info error {user_id}: {e}")
 
 
-    async def search_random_user(self, user_id: int, user_sex:SexEnum, opposite_sex: SexEnum) -> Profile|None:
+    async def search_random_user(self, user_id: int, user_sex: SexEnum, opposite_sex: OppositeSexEnum) -> Profile|None:
         try:
             async with self.session.begin():
                 subq = (
@@ -82,9 +82,10 @@ class ProfileRepo(Repo):
                 stmt = (
                     select(Profile)
                     .where(
-                        and_(Profile.user_id.notin_(subq), Profile.user_id != user_id),
-                        Profile.sex == opposite_sex,
-                        Profile.opposite_sex == user_sex
+                        Profile.user_id.notin_(subq),
+                        Profile.user_id != user_id,
+                        (Profile.sex == opposite_sex if opposite_sex != OppositeSexEnum.BOTH else true()),
+                        (Profile.opposite_sex == user_sex if Profile.opposite_sex != OppositeSexEnum.BOTH else true())
                     )
                     .limit(1)
                 )

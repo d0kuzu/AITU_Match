@@ -5,6 +5,11 @@ class SexEnum(Enum):
     MALE = "male"
     FEMALE = "female"
 
+class OppositeSexEnum(Enum):
+    MALE = "male"
+    FEMALE = "female"
+    BOTH = "both"
+
 class UniEnum(Enum): # TODO: sinc with const.specializations
     SE = "SE"
     CS = "CS"

@@ -6,6 +6,7 @@ from database import repo
 from database.session import get_db
 from telegram.handlers import registration, admin, search_profiles
 from telegram.middlewares.env_middleware import EnvMiddleware
+from telegram.middlewares.last_activity_middleware import LastActivityMiddleware
 from telegram.middlewares.repo_middleware import RepoMiddleware
 from telegram.middlewares.scheduler_middleware import SchedulerMiddleware
 
@@ -44,6 +45,11 @@ class TgRegister:
         repo_middleware = RepoMiddleware()
         scheduler_middleware = SchedulerMiddleware(self.scheduler)
         env_middleware = EnvMiddleware(self.env)
+        last_activity_middleware = LastActivityMiddleware()
+
+        self.dp.callback_query.middleware(LastActivityMiddleware)
+        self.dp.message.middleware(LastActivityMiddleware)
+        self.dp.inline_query.middleware(LastActivityMiddleware)
 
         self.dp.callback_query.middleware(repo_middleware)
         self.dp.message.middleware(repo_middleware)
