@@ -5,23 +5,22 @@ from config.config import Environ
 from database import repo
 from database.session import get_db
 from telegram.handlers import registration, admin, search_profiles
+from telegram.jobs.notification import noification_sender
 from telegram.middlewares.env_middleware import EnvMiddleware
 from telegram.middlewares.last_activity_middleware import LastActivityMiddleware
 from telegram.middlewares.repo_middleware import RepoMiddleware
 from telegram.middlewares.scheduler_middleware import SchedulerMiddleware
 
 class TgRegister:
-    def __init__(self, dp: Dispatcher, bot: Bot):
-
+    def __init__(self, dp: Dispatcher, bot: Bot, env: Environ):
         self.dp = dp
         self.bot = bot
 
         self.scheduler = None
-        self.env = None
+        self.env = env
 
     async def register(self):
         self._create_scheduler()
-        self._create_env()
 
         self._register_handlers()
         self._register_middlewares()
@@ -31,10 +30,6 @@ class TgRegister:
         scheduler = AsyncIOScheduler(timezone=None)
         scheduler.start()
         self.scheduler = scheduler
-
-    def _create_env(self):
-        env = Environ()
-        self.env = env
 
     def _register_handlers(self):
         self.dp.include_routers(admin.router)
@@ -63,6 +58,12 @@ class TgRegister:
         self.dp.inline_query.middleware(env_middleware)
 
     def _register_tasks(self):
+        self.scheduler.add_job(
+            func=noification_sender,
+            trigger="interval",
+            minutes=1,
+            args=[self.bot],
+        )
         ### OLD STRUCTURE ###
         # self.scheduler.add_job(
         #     func=counter_task,

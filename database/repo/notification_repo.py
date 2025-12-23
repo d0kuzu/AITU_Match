@@ -1,5 +1,8 @@
 import logging
+from typing import Any, Coroutine, Sequence
 
+from sqlalchemy import select, delete
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.notification import Notification
@@ -11,6 +14,22 @@ class NotificationRepo(Repo):
         super().__init__(session)
 
 
+    async def get_available(self) -> Sequence[Notification] | None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    select(Notification)
+                    .options(selectinload(Notification.action))
+                )
+                result = await self.session.execute(stmt)
+                notifications = result.scalars().all()
+            return notifications
+
+        except Exception as e:
+            logging.error(f"notification_repo.get_available error: {e}")
+            return None
+
+
     async def create_notification(self, action_id: int):
         try:
             async with self.session.begin():
@@ -20,5 +39,17 @@ class NotificationRepo(Repo):
 
                 await self.session.merge(stmt)
         except Exception as e:
-            logging.error(f"notification_repo.create_notification {action_id}: {e}")
+            logging.error(f"notification_repo.create_notification error {action_id}: {e}")
             return None
+
+
+    async def delete_notification(self, action_id: int):
+        try:
+            async with self.session.begin():
+                stmt = (
+                    delete(Notification)
+                    .where(Notification.action_id == action_id)
+                )
+                await self.session.execute(stmt)
+        except Exception as e:
+            logging.error(f"notification_repo.delete_notification error {action_id}: {e}")

@@ -6,11 +6,12 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
 
+from config.config import Environ
 from database.main import init_db, close_db
 from telegram.register import TgRegister
 
 
-async def start():
+async def start(environ: Environ):
 
     async def on_startup():
         await init_db()
@@ -19,7 +20,7 @@ async def start():
         await close_db()
 
 
-    bot = Bot(env.bot_token)
+    bot = Bot(environ.bot.token)
     storage = MemoryStorage()
     dp = Dispatcher(bot=bot, storage=storage)
 
@@ -29,12 +30,14 @@ async def start():
         BotCommand(command='start', description='Начать!')
     ])
 
-    tg_register = TgRegister(dp, bot)
+    tg_register = TgRegister(dp, bot, environ)
     await tg_register.register()
 
     await dp.start_polling(bot, on_startup=on_startup, on_shutdown=on_shutdown)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=env.logging_level)
+    env = Environ()
+
+    logging.basicConfig(level=env.bot.logging_level)
     coloredlogs.install()
-    asyncio.run(start())
+    asyncio.run(start(env))
