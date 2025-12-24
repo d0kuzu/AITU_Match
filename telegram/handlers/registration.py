@@ -221,7 +221,7 @@ async def save_profile_photos(message: Message, state: FSMContext, repos: Repos)
 
     profile = await repos.profile.create(message.from_user.id, data, s3paths)
 
-    await send_photos(message, s3paths, f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}")
+    await send_photos(message.bot, s3paths, f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}", message.from_user.id)
 
     await state.set_state(MenuStates.main_menu)
     await show_menu(message)

@@ -1,8 +1,7 @@
 import json
 
-from aiogram import Router, F, Bot, Dispatcher
+from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import Message
 
 from config.enums import ActionEnum
@@ -44,11 +43,11 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos):
         await state.update_data(current_viewing_tg_id=profile.tg_id)
 
         try:
-            await send_photos(message, json.loads(profile.s3_path),
+            await send_photos(message.bot, json.loads(profile.s3_path),
                               (
                                   f"{profile.name}, {profile.age} лет, {profile.uni}\n"
                                   f"{profile.description}"
-                              ))
+                              ), message.from_user.id)
 
             await state.set_state(SearchProfilesStates.viewing_profile)
 

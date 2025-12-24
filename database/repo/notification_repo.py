@@ -1,10 +1,11 @@
 import logging
 from typing import Any, Coroutine, Sequence
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config.enums import NotificationStateEnum
 from database.models.notification import Notification
 from database.repo.repo import Repo
 
@@ -35,6 +36,7 @@ class NotificationRepo(Repo):
             async with self.session.begin():
                 stmt = Notification(
                     action_id=action_id,
+                    state=NotificationStateEnum.WAITING,
                 )
 
                 await self.session.merge(stmt)
@@ -53,3 +55,16 @@ class NotificationRepo(Repo):
                 await self.session.execute(stmt)
         except Exception as e:
             logging.error(f"notification_repo.delete_notification error {action_id}: {e}")
+
+    async def set_sent_state(self, id: int):
+        try:
+            async with self.session.begin():
+                stmt = (
+                    update(Notification)
+                    .where(Notification.id == id)
+                    .values(state=NotificationStateEnum.SENT)
+                )
+
+                await self.session.execute(stmt)
+        except Exception as e:
+            logging.error(f"notification_repo.set_sent_state error {id}: {e}")

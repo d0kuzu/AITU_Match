@@ -5,7 +5,7 @@ from config.config import Environ
 from database import repo
 from database.session import get_db
 from telegram.handlers import registration, admin, search_profiles
-from telegram.jobs.notification import noification_sender
+from telegram.jobs.notification import notification_sender
 from telegram.middlewares.env_middleware import EnvMiddleware
 from telegram.middlewares.last_activity_middleware import LastActivityMiddleware
 from telegram.middlewares.repo_middleware import RepoMiddleware
@@ -59,10 +59,10 @@ class TgRegister:
 
     def _register_tasks(self):
         self.scheduler.add_job(
-            func=noification_sender,
+            func=notification_sender,
             trigger="interval",
             minutes=1,
-            args=[self.bot],
+            args=[self.bot, self.dp],
         )
         ### OLD STRUCTURE ###
         # self.scheduler.add_job(

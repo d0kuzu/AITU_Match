@@ -18,3 +18,11 @@ class ActionEnum(Enum):
     like = "like"
     skip = "skip"
     message = "message"
+
+class FlowEnum(Enum):
+    HARD = "hard"
+    EASY = "easy"
+
+class NotificationStateEnum(Enum):
+    WAITING = "waiting"
+    SENT = "sent"
