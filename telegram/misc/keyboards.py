@@ -59,7 +59,7 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.search_profiles_texts.message)
         builder.button(text=TEXTS.search_profiles_texts.skip)
         builder.button(text=TEXTS.search_profiles_texts.leave)
-        builder.adjust(3)
+        builder.adjust(4)
         return builder.as_markup()
 
     @staticmethod
@@ -67,4 +67,13 @@ class ReplyKeyboards:
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.notification_texts.see_likes)
         builder.adjust(1)
+        return builder.as_markup()
+
+
+    @staticmethod
+    def view_who_liked_actions():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.search_profiles_texts.like)
+        builder.button(text=TEXTS.search_profiles_texts.skip)
+        builder.adjust(2)
         return builder.as_markup()

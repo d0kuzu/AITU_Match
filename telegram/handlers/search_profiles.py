@@ -68,7 +68,7 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos):
         await show_menu(message)
 
 
-@router.message(SearchProfilesStates.viewing_profile)
+@router.message(SearchProfilesStates.viewing_profile, F.text in [TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.message, TEXTS.search_profiles_texts.skip, TEXTS.search_profiles_texts.leave])
 async def leave_profile_search(message: Message, state: FSMContext, repos: Repos):
     if message.text == TEXTS.search_profiles_texts.leave:
         await state.clear()
