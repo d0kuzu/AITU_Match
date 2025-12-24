@@ -160,9 +160,9 @@ async def profile_opposite_sex(message: Message, state: FSMContext):
         )
     else:
         if message.text == sexes[1]:
-            await state.update_data(opposite_sex='females')
+            await state.update_data(opposite_sex='female')
         elif message.text == sexes[0]:
-            await state.update_data(opposite_sex='males')
+            await state.update_data(opposite_sex='male')
         else:
             await state.update_data(opposite_sex='both')
 
