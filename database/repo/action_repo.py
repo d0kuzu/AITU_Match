@@ -1,8 +1,9 @@
 import logging
 
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config.enums import ActionEnum
+from config.enums import ActionEnum, ActionStatusEnum
 from database.models.action import Action
 from database.repo.repo import Repo
 
@@ -17,8 +18,9 @@ class ActionRepo(Repo):
             async with self.session.begin():
                 stmt = Action(
                     user_id=user_id,
-                    target_id=target_id,
                     action_type=action,
+                    target_id=target_id,
+                    status=ActionStatusEnum.PENDING,
                 )
 
                 result = await self.session.merge(stmt)
@@ -28,4 +30,15 @@ class ActionRepo(Repo):
             return None
 
 
-    async def
+    async def change_action_status(self, action_id: int, status: ActionStatusEnum):
+        try:
+            async with self.session.begin():
+                stmt = (
+                    update(Action)
+                    .where(Action.id == action_id)
+                    .values(status=status)
+                )
+                await self.session.execute(stmt)
+        except Exception as e:
+            logging.error(f"action_repo.change_action_status error: {e}")
+

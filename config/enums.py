@@ -19,6 +19,11 @@ class ActionEnum(Enum):
     skip = "skip"
     message = "message"
 
+class ActionStatusEnum(Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    DECLINED = "declined"
+
 class FlowEnum(Enum):
     HARD = "hard"
     EASY = "easy"

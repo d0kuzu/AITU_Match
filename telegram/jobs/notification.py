@@ -8,7 +8,6 @@ from aiogram.types import ReplyKeyboardMarkup
 from config.enums import FlowEnum, NotificationStateEnum
 from database.repo import Repos
 from database.session import get_db
-from services.helpers.send_photos import send_photos
 from telegram.misc.keyboards import ReplyKeyboards
 from telegram.misc.states import SeeLikeNotificationsStates
 from telegram.misc.texts import TEXTS
