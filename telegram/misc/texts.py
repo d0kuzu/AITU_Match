@@ -78,8 +78,13 @@ class SearchProfilesTexts:
     skip: str = "👎"
     leave: str = "💤"
     start_search: str = "Начинаем поиск анкет..."
-    messaged_for_liked = "Тебя лайкнули, хочешь узнать кто это?"
-    see_who_liked = "Посмотреть"
+
+
+@dataclass(frozen=True)
+class NotificationTexts:
+    notify_like: str = "Твоя анкета кому-то понравилась"
+    notify_likes: str = "Твою анкету лайкнули {count} раз"
+    see_likes: str = "Посмотреть"
 
 
 @dataclass(frozen=True)
@@ -93,6 +98,7 @@ class Texts:
     menu_texts: MenuTexts = MenuTexts()
     profile_texts: ProfileTexts = ProfileTexts()
     search_profiles_texts: SearchProfilesTexts = SearchProfilesTexts()
+    notification_texts: NotificationTexts = NotificationTexts()
     error_texts: ErrorTexts = ErrorTexts()
 
 

@@ -21,11 +21,11 @@ class NotificationRepo(Repo):
                 stmt = (
                     select(Notification)
                     .options(selectinload(Notification.action))
+                    .order_by(Notification.id.desc())
                 )
                 result = await self.session.execute(stmt)
                 notifications = result.scalars().all()
             return notifications
-
         except Exception as e:
             logging.error(f"notification_repo.get_available error: {e}")
             return None
@@ -55,6 +55,7 @@ class NotificationRepo(Repo):
                 await self.session.execute(stmt)
         except Exception as e:
             logging.error(f"notification_repo.delete_notification error {action_id}: {e}")
+
 
     async def set_sent_state(self, id: int):
         try:

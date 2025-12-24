@@ -22,6 +22,11 @@ class SearchProfilesStates(StatesGroup):
     viewing_profile = State()
 
 
+class SeeLikeNotificationsStates(StatesGroup):
+    pending = State()
+    viewing_profile = State()
+
+
 class MenuStates(StatesGroup):
     main_menu = State()
 

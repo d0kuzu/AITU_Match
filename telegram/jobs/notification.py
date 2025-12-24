@@ -3,10 +3,15 @@ import logging
 from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.base import StorageKey
+from aiogram.types import ReplyKeyboardMarkup
+
 from config.enums import FlowEnum, NotificationStateEnum
 from database.repo import Repos
 from database.session import get_db
 from services.helpers.send_photos import send_photos
+from telegram.misc.keyboards import ReplyKeyboards
+from telegram.misc.states import SeeLikeNotificationsStates
+from telegram.misc.texts import TEXTS
 
 
 async def notification_sender(bot: Bot, dp: Dispatcher):
@@ -15,29 +20,33 @@ async def notification_sender(bot: Bot, dp: Dispatcher):
 
         notifications = await repos.notification.get_available()
 
+        should_notify_users = {}
+
         for notification in notifications:
-            if notification.state != NotificationStateEnum.WAITING:
-                continue
-
             target_id = notification.action.target_id
-            owner_id = notification.action.user_id
 
-            key = StorageKey(bot.id, target_id, target_id)
-            target_data = await dp.storage.get_data(key)
+            if notification.state == NotificationStateEnum.WAITING:
+                repos.notification.set_sent_state(notification.id)
 
-            last_activity = target_data.get("last_activity", datetime.now())
-            flow = target_data.get("flow", FlowEnum.EASY)
+            if notification.state == NotificationStateEnum.WAITING and should_notify_users.get(target_id) is None:
+                should_notify_users[target_id] = 1
 
-            if flow==FlowEnum.HARD and datetime.now() - last_activity < timedelta(minutes=5):
-                continue
+                key = StorageKey(bot.id, target_id, target_id)
+                target_data = await dp.storage.get_data(key)
 
-            owner_profile = repos.profile.search_by_user_id(owner_id)
-            if owner_profile is None:
-                logging.info(f"skip notification for {owner_id} cause None profile")
+                last_activity = target_data.get("last_activity", datetime.now())
+                flow = target_data.get("flow", FlowEnum.EASY)
 
-            # text = f"Твоя анкета понравилась: \n\n{owner_profile.name}, {owner_profile.age}, {owner_profile.uni.value} - {owner_profile.description}"
-            #
-            # await send_photos(bot, json.loads(owner_profile.s3_path), text, target_id)
+                if flow == FlowEnum.HARD and datetime.now() - last_activity < timedelta(minutes=5):
+                    continue
 
-            # repos.notification.delete_notification(notification.id)
-            repos.notification.set_sent_state(notification.id)  #TODO: add ваша анкета понравилась /кол-во лайков/
+                await dp.storage.set_state(key, SeeLikeNotificationsStates.pending)
+
+            elif should_notify_users.get(target_id) is not None:
+                should_notify_users[target_id] += 1
+
+        for target in should_notify_users:
+            count = should_notify_users[target]
+            text = TEXTS.notification_texts.notify_like \
+                if count == 1 else TEXTS.notification_texts.notify_likes.format(count=count)
+            await bot.send_message(target, text, reply_markup=ReplyKeyboards.view_who_liked())

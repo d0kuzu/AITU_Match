@@ -65,6 +65,6 @@ class ReplyKeyboards:
     @staticmethod
     def view_who_liked():
         builder = ReplyKeyboardBuilder()
-        builder.button(text=TEXTS.search_profiles_texts.see_who_liked)
+        builder.button(text=TEXTS.notification_texts.see_likes)
         builder.adjust(1)
         return builder.as_markup()
