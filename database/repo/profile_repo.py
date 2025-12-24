@@ -67,9 +67,11 @@ class ProfileRepo(Repo):
             print(f"profile_repo.get_sex_info error {user_id}: {e}")
 
 
-    async def search_random_user(self, user_id: int, user_sex: SexEnum, opposite_sex: OppositeSexEnum) -> Profile|None:
+    async def search_random_user(self, user_id: int, sex: SexEnum, opposite_sex: OppositeSexEnum) -> Profile|None:
         try:
             async with self.session.begin():
+                sex = OppositeSexEnum(sex.value)
+                opposite_sex = SexEnum(opposite_sex.value)
                 subq = (
                     select(Action.target_id)
                     .where(
@@ -84,8 +86,8 @@ class ProfileRepo(Repo):
                     .where(
                         Profile.user_id.notin_(subq),
                         Profile.user_id != user_id,
-                        (Profile.sex == opposite_sex if opposite_sex != OppositeSexEnum.BOTH else true()),
-                        (Profile.opposite_sex == user_sex if Profile.opposite_sex != OppositeSexEnum.BOTH else true())
+                        (Profile.sex == opposite_sex) if opposite_sex != OppositeSexEnum.BOTH else true(),
+                        or_(Profile.opposite_sex == OppositeSexEnum.BOTH, Profile.opposite_sex == sex)
                     )
                     .limit(1)
                 )

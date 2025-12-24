@@ -16,8 +16,7 @@ class ReplyKeyboards:
     def welcome_keyboard():
         builder = ReplyKeyboardBuilder()
         builder.button(text="Начать")
-        builder.adjust(1)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)
 
     @staticmethod
     def choose_sex():
@@ -25,7 +24,7 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.profile_texts.profile_create_sex_male)
         builder.button(text=TEXTS.profile_texts.profile_create_sex_female)
         builder.adjust(2)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)
 
     @staticmethod
     def choose_opposite_sex():
@@ -34,14 +33,14 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.profile_texts.profile_create_opposite_sex_females)
         builder.button(text=TEXTS.profile_texts.profile_create_opposite_sex_both)
         builder.adjust(3)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)
 
     @staticmethod
     def save_photos():
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.profile_texts.profile_create_photo_save)
         builder.adjust(1)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)
 
     @staticmethod
     def main_menu():
@@ -50,7 +49,7 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.menu_texts.edit_profile_text)
         builder.button(text=TEXTS.menu_texts.go_to_deepseek_text)
         builder.adjust(1)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)
 
     @staticmethod
     def profiles_search_actions():
@@ -60,14 +59,14 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.search_profiles_texts.skip)
         builder.button(text=TEXTS.search_profiles_texts.leave)
         builder.adjust(4)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)
 
     @staticmethod
     def view_who_liked():
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.notification_texts.see_likes)
         builder.adjust(1)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)
 
 
     @staticmethod
@@ -76,4 +75,4 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.search_profiles_texts.like)
         builder.button(text=TEXTS.search_profiles_texts.skip)
         builder.adjust(2)
-        return builder.as_markup()
+        return builder.as_markup(resize_keyboard=True)

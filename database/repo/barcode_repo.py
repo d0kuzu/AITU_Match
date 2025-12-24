@@ -14,12 +14,13 @@ class BarcodeRepo(Repo):
 
     async def is_exist(self, code: str) -> bool:
         try:
-            stmt = (
-                select(Barcode)
-                    .where(Barcode.code == code)
-            )
-            result = await self.session.execute(stmt)
-            barcode = result.scalar_one_or_none()
+            async with self.session.begin():
+                stmt = (
+                    select(Barcode)
+                        .where(Barcode.code == code)
+                )
+                result = await self.session.execute(stmt)
+                barcode = result.scalar_one_or_none()
             return barcode is not None
         except Exception as e:
             logging.error(f"barcode_repo.is_exist error {code}: {e}")

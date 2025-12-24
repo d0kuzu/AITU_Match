@@ -15,8 +15,6 @@ from telegram.misc.texts import TEXTS
 
 router = Router()
 
-router.message.filter(RegisteredFilter())
-
 
 @router.message(MenuStates.main_menu, F.text == TEXTS.menu_texts.search_profiles_text)
 async def start_profiles_search(message: Message, state: FSMContext, repos: Repos):
@@ -29,6 +27,7 @@ async def start_profiles_search(message: Message, state: FSMContext, repos: Repo
         return
 
     sex, opposite_sex = result
+    print(sex, opposite_sex)
     await state.update_data(sex=sex, opposite_sex=opposite_sex)
 
     await message.answer(TEXTS.search_profiles_texts.start_search, reply_markup=ReplyKeyboards.profiles_search_actions())
@@ -40,12 +39,12 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos):
     profile = await repos.profile.search_random_user(message.from_user.id, data.get("sex"), data.get("opposite_sex"))
 
     if profile:
-        await state.update_data(current_viewing_tg_id=profile.tg_id)
+        await state.update_data(current_viewing_tg_id=profile.user_id)
 
         try:
             await send_photos(message.bot, json.loads(profile.s3_path),
                               (
-                                  f"{profile.name}, {profile.age} лет, {profile.uni}\n"
+                                  f"{profile.name}, {profile.age} лет, {profile.uni.value}\n"
                                   f"{profile.description}"
                               ), message.from_user.id)
 
@@ -68,7 +67,7 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos):
         await show_menu(message)
 
 
-@router.message(SearchProfilesStates.viewing_profile, F.text in [TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.message, TEXTS.search_profiles_texts.skip, TEXTS.search_profiles_texts.leave])
+@router.message(SearchProfilesStates.viewing_profile, F.text.in_([TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.message, TEXTS.search_profiles_texts.skip, TEXTS.search_profiles_texts.leave]))
 async def leave_profile_search(message: Message, state: FSMContext, repos: Repos):
     if message.text == TEXTS.search_profiles_texts.leave:
         await state.clear()
@@ -83,15 +82,31 @@ async def leave_profile_search(message: Message, state: FSMContext, repos: Repos
     action = ActionEnum.like if message.text == TEXTS.search_profiles_texts.like \
         else ActionEnum.skip if message.text == TEXTS.search_profiles_texts.skip else ActionEnum.message
 
-    if action == TEXTS.search_profiles_texts.like:
-        action_id = await repos.action.create_action(message.from_user.id, target_id)
-        repos.notification.create_notification(action_id)
+    if action == ActionEnum.like:
+        action_id = await repos.action.create_action(message.from_user.id, target_id, ActionEnum.like)
+        await repos.notification.create_notification(action_id)
 
         await send_next_profile(message, state, repos)
         return
 
-    elif action == TEXTS.search_profiles_texts.skip:
-        await repos.action.create_action(message.from_user.id, target_id)
+    elif action == ActionEnum.skip:
+        await repos.action.create_action(message.from_user.id, target_id, ActionEnum.skip)
 
         await send_next_profile(message, state, repos)
         return
+
+    else:
+        await message.answer("Отправьте сообщение что хотите передать (только текст)")
+        await state.set_state(SearchProfilesStates.wait_message)
+
+
+@router.message(SearchProfilesStates.wait_message)
+async def send_message(message: Message, state: FSMContext, repos: Repos):
+    data = await state.get_data()
+
+    target_id = data.get("current_viewing_tg_id")
+
+    action_id = await repos.action.create_action(message.from_user.id, target_id, ActionEnum.message, message.text)
+    await repos.notification.create_notification(action_id)
+
+    await send_next_profile(message, state, repos)

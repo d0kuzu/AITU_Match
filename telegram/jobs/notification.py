@@ -24,9 +24,6 @@ async def notification_sender(bot: Bot, dp: Dispatcher):
         for notification in notifications:
             target_id = notification.action.target_id
 
-            if notification.state == NotificationStateEnum.WAITING:
-                repos.notification.set_sent_state(notification.id)
-
             if notification.state == NotificationStateEnum.WAITING and should_notify_users.get(target_id) is None:
                 should_notify_users[target_id] = 1
 
@@ -43,6 +40,10 @@ async def notification_sender(bot: Bot, dp: Dispatcher):
 
             elif should_notify_users.get(target_id) is not None:
                 should_notify_users[target_id] += 1
+
+            if notification.state == NotificationStateEnum.WAITING:
+                await repos.notification.set_sent_state(notification.id)
+
 
         for target in should_notify_users:
             count = should_notify_users[target]

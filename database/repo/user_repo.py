@@ -23,9 +23,10 @@ class UserRepo(Repo):
 
     async def is_exist(self, user_id: int) -> bool:
         try:
-            stmt = select(User).where(User.user_id == user_id)
-            result = await self.session.execute(stmt)
-            user = result.scalar_one_or_none()
+            async with self.session.begin():
+                stmt = select(User).where(User.user_id == user_id)
+                result = await self.session.execute(stmt)
+                user = result.scalar_one_or_none()
             return user is not None
         except Exception as e:
             logging.error(f"user_repo.is_exist error {user_id}: {e}")
@@ -34,10 +35,11 @@ class UserRepo(Repo):
 
     async def is_user_exist_by_barcode(self, barcode: str) -> bool:
         try:
-            stmt = select(User).where(User.barcode == barcode)
-            result = await self.session.execute(stmt)
-            user = result.scalar_one_or_none()
-            return user is not None
+            async with self.session.begin():
+                stmt = select(User).where(User.barcode == barcode)
+                result = await self.session.execute(stmt)
+                user = result.scalar_one_or_none()
+                return user is not None
         except Exception as e:
             logging.error(f"user_repo.is_exist_by_barcode error {barcode}: {e}")
             return False

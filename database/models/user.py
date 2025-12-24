@@ -7,4 +7,4 @@ class User(Base):
     __tablename__ = "users"
 
     user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    barcode: Mapped[int] = mapped_column(ForeignKey("barcodes.code"), nullable=True)
+    barcode: Mapped[str] = mapped_column(ForeignKey("barcodes.code"), nullable=True)

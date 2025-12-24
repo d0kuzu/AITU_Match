@@ -14,7 +14,7 @@ from telegram.register import TgRegister
 async def start(environ: Environ):
 
     async def on_startup():
-        await init_db()
+        await init_db(environ.db.asyncpg_url)
 
     async def on_shutdown():
         await close_db()
@@ -23,8 +23,7 @@ async def start(environ: Environ):
     bot = Bot(environ.bot.token)
     storage = MemoryStorage()
     dp = Dispatcher(bot=bot, storage=storage)
-
-    await init_db()
+    await init_db(environ.db.asyncpg_url)
 
     await bot.set_my_commands([
         BotCommand(command='start', description='Начать!')

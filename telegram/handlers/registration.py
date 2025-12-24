@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 from aiogram import Router, F
 from aiogram.enums import ChatAction
@@ -7,11 +6,8 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, FSInputFile, ReplyKeyboardRemove
 
-from config.config import Environ
-from database.models.profile import Profile
-from database.repo import UserRepo, ProfileRepo, Repos
+from database.repo import Repos
 from services.helpers.send_photos import send_photos
-from telegram.filters.registration import RegisteredFilter
 from telegram.handlers.menu import show_menu
 from telegram.misc.consts import specializations
 from telegram.misc.keyboards import ReplyKeyboards
@@ -21,23 +17,32 @@ from telegram.misc.texts import TEXTS
 
 router = Router()
 
-router.message.filter(not RegisteredFilter())
 
 @router.message(CommandStart())
-async def command_start(message: Message, state: FSMContext):
-    await message.answer_photo(
-        photo=FSInputFile(PATHS.welcome_photo),
-        caption=TEXTS.welcome_texts.welcome_text,
-        reply_markup=ReplyKeyboards.welcome_keyboard(),
-        parse_mode="Markdown",
-    )
+async def command_start(message: Message, state: FSMContext, repos: Repos):
+    is_registered = await repos.user.is_exist(message.from_user.id)
 
-    await state.set_state(WelcomeStatesGroup.ask_barcode)
+    if not is_registered:
+        await message.answer_photo(
+            photo=FSInputFile(PATHS.welcome_photo),
+            caption=TEXTS.welcome_texts.welcome_text,
+            reply_markup=ReplyKeyboards.welcome_keyboard(),
+            parse_mode="Markdown",
+        )
+
+        await state.set_state(WelcomeStatesGroup.ask_barcode)
+    else:
+        profile = await repos.profile.search_by_user_id(message.from_user.id)
+        if not profile:
+            await profile_create_start(message, state)
+        else:
+            await state.set_state(MenuStates.main_menu)
+            await show_menu(message)
 
 
 @router.message(WelcomeStatesGroup.ask_barcode)
 async def user_barcode(message: Message, state: FSMContext):
-    await message.answer(TEXTS.welcome_texts.text_main_menu)
+    await message.answer(TEXTS.welcome_texts.text_main_menu, reply_markup=ReplyKeyboardRemove())
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
     await asyncio.sleep(1)
 
@@ -52,12 +57,13 @@ async def wait_user_barcode(message: Message, state: FSMContext, repos: Repos):
         if len(message.text) == 6 and await repos.barcode.is_exist(message.text):
             if not await repos.user.is_user_exist_by_barcode(message.text):
                 try:
-                    await repos.user.create(message.from_user.id, int(message.text))
+                    await repos.user.create(message.from_user.id, message.text)
 
                     await state.set_state(WelcomeStatesGroup.welcome)
                     await message.answer("Welcome to the club, buddy!")
                     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
                     await asyncio.sleep(2)
+                    await profile_create_start(message, state)
                 except Exception as e:
                     print(f"Error during user registration: {e}")
                     await state.clear()

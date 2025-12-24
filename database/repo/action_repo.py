@@ -13,7 +13,7 @@ class ActionRepo(Repo):
         super().__init__(session)
 
 
-    async def create_action(self, user_id: int, target_id: int, action: ActionEnum) -> int | None:
+    async def create_action(self, user_id: int, target_id: int, action: ActionEnum, message: str="") -> int | None:
         try:
             async with self.session.begin():
                 stmt = Action(
@@ -21,12 +21,13 @@ class ActionRepo(Repo):
                     action_type=action,
                     target_id=target_id,
                     status=ActionStatusEnum.PENDING,
+                    message=message
                 )
 
                 result = await self.session.merge(stmt)
             return result.id
         except Exception as e:
-            logging.error(f"action_repo.create_action {action}: {e}")
+            logging.error(f"action_repo.create_action error {action}: {e}")
             return None
 
 

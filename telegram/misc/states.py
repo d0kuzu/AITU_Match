@@ -20,6 +20,7 @@ class CreateProfileStates(StatesGroup):
 
 class SearchProfilesStates(StatesGroup):
     viewing_profile = State()
+    wait_message = State()
 
 
 class SeeLikeNotificationsStates(StatesGroup):

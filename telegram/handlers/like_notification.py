@@ -4,7 +4,7 @@ import logging
 from aiogram import Router, F
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from config.enums import ActionStatusEnum
 from database.repo import Repos
@@ -16,7 +16,6 @@ from telegram.misc.texts import TEXTS
 
 router = Router()
 
-router.message.filter(RegisteredFilter())
 
 @router.message(SeeLikeNotificationsStates.pending, F.text==TEXTS.notification_texts.see_likes)
 async def see_likes(message: Message, state: FSMContext, repos: Repos):
@@ -24,7 +23,7 @@ async def see_likes(message: Message, state: FSMContext, repos: Repos):
     for notification in notifications:
         if notification.action.target_id == message.from_user.id:
             owner_id = notification.action.user_id
-            owner_profile = repos.profile.search_by_user_id(owner_id)
+            owner_profile = await repos.profile.search_by_user_id(owner_id)
 
             if owner_profile is None:
                 logging.info(f"skip notification for {owner_id} cause None profile")
@@ -37,12 +36,13 @@ async def see_likes(message: Message, state: FSMContext, repos: Repos):
             await state.update_data(action_id=notification.action_id)
             await state.update_data(viewing_profile_id=owner_id, viewing_profile_name=owner_profile.name)
 
-            await message.edit_reply_markup(reply_markup=ReplyKeyboards.view_who_liked_actions())
+            await message.edit_reply_markup(reply_markup=ReplyKeyboards.view_who_liked_actions()) # TODO: doesnt work with ReplyKeyboard
             await send_photos(message.bot, json.loads(owner_profile.s3_path), text, message.from_user.id)
 
-            repos.notification.delete_notification(notification.id)
+            await repos.notification.delete_notification(notification.id)
 
-@router.message(SeeLikeNotificationsStates.viewing_profile, F.text in [TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.skip])
+
+@router.message(SeeLikeNotificationsStates.viewing_profile, F.text.in_([TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.skip]))
 async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
     data = await state.get_data()
     action_id = data.get("action_id")
@@ -69,4 +69,3 @@ async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
         userlink = f'<a href="tg://user?id={message.from_user.id}">{profile.name}</a>'
         text = f"У тебя взаимный лайк!\n{profile.name}, {profile.age}, {profile.uni.value} - {profile.description} \n\nДержи ссылку на чат - {userlink}."
         await message.bot.send_message(message.from_user.id, text)
-

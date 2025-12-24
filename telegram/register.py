@@ -4,7 +4,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config.config import Environ
 from database import repo
 from database.session import get_db
-from telegram.handlers import registration, admin, search_profiles
+from telegram.handlers import registration, search_profiles, like_notification
 from telegram.jobs.notification import notification_sender
 from telegram.middlewares.env_middleware import EnvMiddleware
 from telegram.middlewares.last_activity_middleware import LastActivityMiddleware
@@ -32,9 +32,9 @@ class TgRegister:
         self.scheduler = scheduler
 
     def _register_handlers(self):
-        self.dp.include_routers(admin.router)
         self.dp.include_routers(registration.router)
         self.dp.include_routers(search_profiles.router)
+        self.dp.include_routers(like_notification.router)
 
     def _register_middlewares(self):
         repo_middleware = RepoMiddleware()
