@@ -1,8 +1,9 @@
+import asyncio
 import json
 import logging
 
 from aiogram import Router, F
-from aiogram.enums import ParseMode
+from aiogram.enums import ParseMode, ChatAction
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
@@ -19,6 +20,10 @@ router = Router()
 
 @router.message(SeeLikeNotificationsStates.pending, F.text==TEXTS.notification_texts.see_likes)
 async def see_likes(message: Message, state: FSMContext, repos: Repos):
+    await message.answer(TEXTS.notification_texts.start_show, reply_markup=ReplyKeyboards.view_who_liked_actions())
+    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
+    # await asyncio.sleep(1)
+
     notifications = await repos.notification.get_available()
     for notification in notifications:
         if notification.action.target_id == message.from_user.id:
@@ -36,7 +41,6 @@ async def see_likes(message: Message, state: FSMContext, repos: Repos):
             await state.update_data(action_id=notification.action_id)
             await state.update_data(viewing_profile_id=owner_id, viewing_profile_name=owner_profile.name)
 
-            await message.edit_reply_markup(reply_markup=ReplyKeyboards.view_who_liked_actions()) # TODO: doesnt work with ReplyKeyboard
             await send_photos(message.bot, json.loads(owner_profile.s3_path), text, message.from_user.id)
 
             await repos.notification.delete_notification(notification.id)
@@ -68,4 +72,4 @@ async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
 
         userlink = f'<a href="tg://user?id={message.from_user.id}">{profile.name}</a>'
         text = f"У тебя взаимный лайк!\n{profile.name}, {profile.age}, {profile.uni.value} - {profile.description} \n\nДержи ссылку на чат - {userlink}."
-        await message.bot.send_message(message.from_user.id, text)
+        await send_photos(message.bot, json.loads(profile.s3_path), text, owner_id)

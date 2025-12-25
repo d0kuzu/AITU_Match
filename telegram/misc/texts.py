@@ -82,9 +82,10 @@ class SearchProfilesTexts:
 
 @dataclass(frozen=True)
 class NotificationTexts:
-    notify_like: str = "Твоя анкета кому-то понравилась"
+    notify_like: str = "Твоя анкета кому-то понравилась. Узнай кто это!"
     notify_likes: str = "Твою анкету лайкнули {count} раз"
     see_likes: str = "Посмотреть"
+    start_show: str = "Отлично, подгружаю анкеты..."
 
 
 @dataclass(frozen=True)
