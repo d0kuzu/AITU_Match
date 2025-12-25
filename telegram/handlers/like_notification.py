@@ -11,8 +11,9 @@ from config.enums import ActionStatusEnum
 from database.repo import Repos
 from services.helpers.send_photos import send_photos
 from telegram.filters.registration import RegisteredFilter
+from telegram.handlers.menu import show_menu
 from telegram.misc.keyboards import ReplyKeyboards
-from telegram.misc.states import SeeLikeNotificationsStates
+from telegram.misc.states import SeeLikeNotificationsStates, MenuStates
 from telegram.misc.texts import TEXTS
 
 router = Router()
@@ -22,7 +23,7 @@ router = Router()
 async def see_likes(message: Message, state: FSMContext, repos: Repos):
     await message.answer(TEXTS.notification_texts.start_show, reply_markup=ReplyKeyboards.view_who_liked_actions())
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
-    # await asyncio.sleep(1)
+    await asyncio.sleep(0.5)
 
     notifications = await repos.notification.get_available()
     for notification in notifications:
@@ -44,6 +45,11 @@ async def see_likes(message: Message, state: FSMContext, repos: Repos):
             await send_photos(message.bot, json.loads(owner_profile.s3_path), text, message.from_user.id)
 
             await repos.notification.delete_notification(notification.id)
+
+    await message.answer(TEXTS.notification_texts.end_show)
+    await asyncio.sleep(0.5)
+    await state.set_state(MenuStates.main_menu)
+    await show_menu(message)
 
 
 @router.message(SeeLikeNotificationsStates.viewing_profile, F.text.in_([TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.skip]))

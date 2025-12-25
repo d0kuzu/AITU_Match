@@ -50,7 +50,7 @@ class NotificationRepo(Repo):
             async with self.session.begin():
                 stmt = (
                     delete(Notification)
-                    .where(Notification.action_id == action_id)
+                    .where(Notification.id == action_id)
                 )
                 await self.session.execute(stmt)
         except Exception as e:

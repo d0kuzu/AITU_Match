@@ -86,6 +86,7 @@ class NotificationTexts:
     notify_likes: str = "Твою анкету лайкнули {count} раз"
     see_likes: str = "Посмотреть"
     start_show: str = "Отлично, подгружаю анкеты..."
+    end_show: str = "На этом все"
 
 
 @dataclass(frozen=True)
