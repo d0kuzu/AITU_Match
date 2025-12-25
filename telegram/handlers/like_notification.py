@@ -62,7 +62,7 @@ async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
         userlink = f'<a href="tg://user?id={owner_id}">{owner_name}</a>'
         text = f"Отлично! Поспеши написать в чат первым. \n\nДержи ссылку на чат - {userlink}"
 
-        await message.answer(text, parse_mode=ParseMode.HTML)
+        await message.answer(text, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardRemove())
 
         #______TO OWNER______
         profile = await repos.profile.search_by_user_id(message.from_user.id)
