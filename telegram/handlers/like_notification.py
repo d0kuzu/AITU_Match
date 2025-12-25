@@ -49,7 +49,7 @@ async def see_likes(message: Message, state: FSMContext, repos: Repos):
     await message.answer(TEXTS.notification_texts.end_show)
     await asyncio.sleep(0.5)
     await state.set_state(MenuStates.main_menu)
-    await show_menu(message)
+    await show_menu(message, state)
 
 
 @router.message(SeeLikeNotificationsStates.viewing_profile, F.text.in_([TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.skip]))

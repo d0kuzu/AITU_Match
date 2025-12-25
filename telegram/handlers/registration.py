@@ -37,7 +37,7 @@ async def command_start(message: Message, state: FSMContext, repos: Repos):
             await profile_create_start(message, state)
         else:
             await state.set_state(MenuStates.main_menu)
-            await show_menu(message)
+            await show_menu(message, state)
 
 
 @router.message(WelcomeStatesGroup.ask_barcode)
@@ -66,7 +66,6 @@ async def wait_user_barcode(message: Message, state: FSMContext, repos: Repos):
                     await profile_create_start(message, state)
                 except Exception as e:
                     print(f"Error during user registration: {e}")
-                    await state.clear()
                     await message.answer("Произошла ошибка при регистрации. Попробуйте еще раз.")
             else:
                 await message.answer("Этот barcode уже занят")
@@ -230,7 +229,7 @@ async def save_profile_photos(message: Message, state: FSMContext, repos: Repos)
     await send_photos(message.bot, s3paths, f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}", message.from_user.id)
 
     await state.set_state(MenuStates.main_menu)
-    await show_menu(message)
+    await show_menu(message, state)
 
 
 @router.message(CreateProfileStates.photo)
