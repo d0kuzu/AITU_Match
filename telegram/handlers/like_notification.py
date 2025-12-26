@@ -25,30 +25,47 @@ async def see_likes(message: Message, state: FSMContext, repos: Repos):
     await asyncio.sleep(0.5)
 
     notifications = await repos.notification.get_available()
+    current_user_notifications = []
     for notification in notifications:
         if notification.action.target_id == message.from_user.id:
-            owner_id = notification.action.user_id
-            owner_profile = await repos.profile.search_by_user_id(owner_id)
+            current_user_notifications.append(notification.id)
 
-            if owner_profile is None:
-                logging.info(f"skip notification for {owner_id} cause None profile")
+    await state.update_data(notification_ids=current_user_notifications)
 
-            text = f"Твоя анкета понравилась: \n\n{owner_profile.name}, {owner_profile.age}, {owner_profile.uni.value} - {owner_profile.description}"
-            if notification.action.message is not None:
-                text += f'\n"{notification.action.message}"'
+    await show_next_notification(message, state, repos)
 
-            await state.set_state(SeeLikeNotificationsStates.viewing_profile)
-            await state.update_data(action_id=notification.action_id)
-            await state.update_data(viewing_profile_id=owner_id, viewing_profile_name=owner_profile.name)
 
-            await send_photos(message.bot, json.loads(owner_profile.s3_path), text, message.from_user.id)
 
-            await repos.notification.delete_notification(notification.id)
+
 
     await message.answer(TEXTS.notification_texts.end_show)
     await asyncio.sleep(0.5)
     await state.set_state(MenuStates.main_menu)
     await show_menu(message, state)
+
+
+async def show_next_notification(message: Message, state: FSMContext, repos: Repos):
+    notification_ids = await state.get_value("notification_ids")
+    notification = await repos.notification.get_notification_by_id(notification_ids[0])
+
+    owner_id = notification.action.user_id
+    owner_profile = await repos.profile.search_by_user_id(owner_id)
+
+    if owner_profile is None:
+        logging.info(f"skip notification for {owner_id} cause None profile")
+
+    text = f"Твоя анкета понравилась: \n\n{owner_profile.name}, {owner_profile.age}, {owner_profile.uni.value} - {owner_profile.description}"
+    if notification.action.message is not None:
+        text += f'\n"{notification.action.message}"'
+
+    await state.set_state(SeeLikeNotificationsStates.viewing_profile)
+    await state.update_data(action_id=notification.action_id)
+    await state.update_data(viewing_profile_id=owner_id, viewing_profile_name=owner_profile.name)
+
+    await send_photos(message.bot, json.loads(owner_profile.s3_path), text, message.from_user.id)
+
+    await state.update_data(notification_ids=notification_ids[1:])
+    await repos.notification.delete_notification(notification.id)
 
 
 @router.message(SeeLikeNotificationsStates.viewing_profile, F.text.in_([TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.skip]))
@@ -78,3 +95,5 @@ async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
         userlink = f'<a href="tg://user?id={message.from_user.id}">{profile.name}</a>'
         text = f"У тебя взаимный лайк!\n{profile.name}, {profile.age}, {profile.uni.value} - {profile.description} \n\nДержи ссылку на чат - {userlink}."
         await send_photos(message.bot, json.loads(profile.s3_path), text, owner_id)
+
+    await show_next_notification(message, state, repos)

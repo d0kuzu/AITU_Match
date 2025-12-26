@@ -69,3 +69,20 @@ class NotificationRepo(Repo):
                 await self.session.execute(stmt)
         except Exception as e:
             logging.error(f"notification_repo.set_sent_state error {id}: {e}")
+
+
+    async def get_notification_by_id(self, id: int) -> Notification | None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    select(Notification)
+                    .where(Notification.id == id)
+                    .options(selectinload(Notification.action))
+                    .limit(1)
+                )
+                result = await self.session.execute(stmt)
+                notification = result.scalar_one_or_none()
+                return notification
+        except Exception as e:
+            print(f"notification_repo.get_notification_by_id error {id}: {e}")
+            return None
