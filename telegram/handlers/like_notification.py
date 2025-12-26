@@ -35,17 +35,16 @@ async def see_likes(message: Message, state: FSMContext, repos: Repos):
     await show_next_notification(message, state, repos)
 
 
-
-
-
-    await message.answer(TEXTS.notification_texts.end_show)
-    await asyncio.sleep(0.5)
-    await state.set_state(MenuStates.main_menu)
-    await show_menu(message, state)
-
-
 async def show_next_notification(message: Message, state: FSMContext, repos: Repos):
     notification_ids = await state.get_value("notification_ids")
+
+    if len(notification_ids) == 0:
+        await message.answer(TEXTS.notification_texts.end_show)
+        await asyncio.sleep(0.5)
+        await state.set_state(MenuStates.main_menu)
+        await show_menu(message, state)
+        return
+
     notification = await repos.notification.get_notification_by_id(notification_ids[0])
 
     owner_id = notification.action.user_id
