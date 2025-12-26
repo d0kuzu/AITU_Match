@@ -10,7 +10,6 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from config.enums import ActionStatusEnum
 from database.repo import Repos
 from services.helpers.send_photos import send_photos
-from telegram.filters.registration import RegisteredFilter
 from telegram.handlers.menu import show_menu
 from telegram.misc.keyboards import ReplyKeyboards
 from telegram.misc.states import SeeLikeNotificationsStates, MenuStates

@@ -7,7 +7,6 @@ from aiogram.types import Message
 from config.enums import ActionEnum
 from database.repo import Repos
 from services.helpers.send_photos import send_photos
-from telegram.filters.registration import RegisteredFilter
 from telegram.handlers.menu import show_menu
 from telegram.misc.keyboards import ReplyKeyboards
 from telegram.misc.states import MenuStates, SearchProfilesStates
@@ -27,7 +26,7 @@ async def start_profiles_search(message: Message, state: FSMContext, repos: Repo
         return
 
     sex, opposite_sex = result
-    print(sex, opposite_sex)
+
     await state.update_data(sex=sex, opposite_sex=opposite_sex)
 
     await message.answer(TEXTS.search_profiles_texts.start_search, reply_markup=ReplyKeyboards.profiles_search_actions())

@@ -31,6 +31,7 @@ async def command_start(message: Message, state: FSMContext, repos: Repos):
         )
 
         await state.set_state(WelcomeStatesGroup.ask_barcode)
+
     else:
         profile = await repos.profile.search_by_user_id(message.from_user.id)
         if not profile:
@@ -241,6 +242,8 @@ async def profile_photo(message: Message, state: FSMContext, repos: Repos):
         )
     else:
         data = await state.get_value("photos", [])
+        if len(data) >= 3:
+            return
         data.append(message.photo[-1].file_id)
         await state.update_data(photos=data)
         await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
