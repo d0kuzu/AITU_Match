@@ -246,7 +246,7 @@ async def profile_photo(message: Message, state: FSMContext, repos: Repos):
             return
         data.append(message.photo[-1].file_id)
         await state.update_data(photos=data)
-        await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
+        # await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
 
         if len(data) >= 3:
             await message.answer(TEXTS.profile_texts.profile_create_photo_saving, reply_markup=ReplyKeyboardRemove())

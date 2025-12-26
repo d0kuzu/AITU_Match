@@ -61,7 +61,7 @@ class ProfileTexts:
     profile_create_photo_amount = "Нужно отравить хотябы одно фото"
     profile_create_photo_save = "Сохранить фото"
     profile_create_photo_error = "Вряд ли это фотка! Попробуй еще раз"
-    profile_create_photo_saving = "Сохрняем эти фото"
+    profile_create_photo_saving = "Сохраняем эти фото"
 
 
 @dataclass(frozen=True)
