@@ -39,7 +39,7 @@ async def show_next_notification(message: Message, state: FSMContext, repos: Rep
     notification_ids = await state.get_value("notification_ids")
 
     if len(notification_ids) == 0:
-        await message.answer(TEXTS.notification_texts.end_show)
+        await message.answer(TEXTS.notification_texts.end_show, reply_markup=ReplyKeyboardRemove())
         await asyncio.sleep(0.5)
         await state.set_state(MenuStates.main_menu)
         await show_menu(message, state)
@@ -54,7 +54,7 @@ async def show_next_notification(message: Message, state: FSMContext, repos: Rep
         logging.info(f"skip notification for {owner_id} cause None profile")
 
     text = f"Твоя анкета понравилась: \n\n{owner_profile.name}, {owner_profile.age}, {owner_profile.uni.value} - {owner_profile.description}"
-    if notification.action.message is not None:
+    if notification.action.message is not None or notification.action.message == "":
         text += f'\n"{notification.action.message}"'
 
     await state.set_state(SeeLikeNotificationsStates.viewing_profile)
@@ -83,7 +83,7 @@ async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
         userlink = f'<a href="tg://user?id={owner_id}">{owner_name}</a>'
         text = f"Отлично! Поспеши написать в чат первым. \n\nДержи ссылку на чат - {userlink}"
 
-        await message.answer(text, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardRemove())
+        await message.answer(text, parse_mode=ParseMode.HTML)
 
         #______TO OWNER______
         profile = await repos.profile.search_by_user_id(message.from_user.id)
