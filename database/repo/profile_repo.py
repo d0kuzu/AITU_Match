@@ -126,13 +126,13 @@ class ProfileRepo(Repo):
             logging.error(f"profile_repo.save_profile error {user_id}: {e}")
 
 
-    async def deactivate_profile(self, user_id: int):
+    async def set_is_active(self, user_id: int, is_active: bool):
         try:
             async with self.session.begin():
                 stmt = (
                     update(Profile)
                     .where(Profile.user_id == user_id)
-                    .values(is_active=False)
+                    .values(is_active=is_active)
                 )
                 await self.session.execute(stmt)
         except Exception as e:

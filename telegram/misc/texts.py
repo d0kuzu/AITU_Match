@@ -72,6 +72,7 @@ class MenuTexts:
     say_will_wait: str = "Очень жаль \nВсегда буду рад если ты вернешься и активируешь анкету"
     activate: str = "Активировать анкету"
     ask_activate: str = 'Еще не надумал активировать анкету? \n\nЕсли решил активировать ее снова, нажми кнопку "Активировать анкету"'
+    welcome_back: str = "С возвращением!"
 
 
 @dataclass(frozen=True)
@@ -100,6 +101,7 @@ class ErrorTexts:
 @dataclass(frozen=True)
 class EditProfileTexts:
     ask_what_to_edit: str = "Выберите что хотите изменить"
+    wrong_button: str = "Выбери одну из кнопок"
     edit_name: str = "Изменить имя"
     edit_age: str = "Изменить возраст"
     edit_description: str = "Изменить описание"

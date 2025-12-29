@@ -73,6 +73,9 @@ async def start_to_edit(message: Message, state: FSMContext):
 
             await state.set_state(CreateProfileStates.name)
 
+        case _:
+            await message.answer(TEXTS.edit_profile.wrong_button)
+
 
 async def save_edited_data(message: Message, state: FSMContext, repos: Repos):
     data = await state.get_data()
