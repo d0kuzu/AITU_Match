@@ -47,6 +47,7 @@ class ReplyKeyboards:
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.menu_texts.search_profiles_text)
         builder.button(text=TEXTS.menu_texts.edit_profile_text)
+        builder.button(text=TEXTS.menu_texts.want_deactivate)
         builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)
 

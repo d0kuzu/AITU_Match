@@ -1,7 +1,7 @@
 import json
 import logging
 
-from sqlalchemy import select, or_, and_, true
+from sqlalchemy import select, or_, and_, true, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.enums import SexEnum, OppositeSexEnum
@@ -124,3 +124,16 @@ class ProfileRepo(Repo):
             return
         except Exception as e:
             logging.error(f"profile_repo.save_profile error {user_id}: {e}")
+
+
+    async def deactivate_profile(self, user_id: int):
+        try:
+            async with self.session.begin():
+                stmt = (
+                    update(Profile)
+                    .where(Profile.user_id == user_id)
+                    .values(is_active=False)
+                )
+                await self.session.execute(stmt)
+        except Exception as e:
+            logging.error(f"profile_repo.deactivate_profile error {user_id}: {e}")

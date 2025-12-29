@@ -68,7 +68,8 @@ class ProfileTexts:
 class MenuTexts:
     search_profiles_text: str = "Смотреть анкеты 🔎"
     edit_profile_text: str = "Редактировать свою анкету 🪞"
-    go_to_deepseek_text: str = "Мне никто не пишет. . ."
+    want_deactivate: str = "Хочу отключить анкету"
+    say_will_wait: str = "Очень жаль \nВсегда буду рад если ты вернешься и активируешь анкету"
 
 
 @dataclass(frozen=True)

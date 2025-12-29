@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, ForeignKey, String, Integer, Text, DateTime, Enum, func
+from sqlalchemy import BigInteger, ForeignKey, String, Integer, Text, DateTime, Enum, func, Boolean
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from config.enums import SexEnum, UniEnum, OppositeSexEnum
@@ -17,6 +17,7 @@ class Profile(Base):
     opposite_sex: Mapped[OppositeSexEnum] = mapped_column(Enum(OppositeSexEnum), nullable=False)
     uni: Mapped[UniEnum] = mapped_column(Enum(UniEnum), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     s3_path: Mapped[str] = mapped_column(String, nullable=False)
 
