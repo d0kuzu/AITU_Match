@@ -216,7 +216,7 @@ async def profile_description(message: Message, state: FSMContext, repos: Repos)
 
     await message.answer(
         TEXTS.profile_texts.profile_create_photo,
-        reply_markup=ReplyKeyboardRemove(),
+        reply_markup=ReplyKeyboards.save_photos(),
     )
     await state.set_state(CreateProfileStates.photo)
 
@@ -259,8 +259,7 @@ async def save_profile_photos(message: Message, state: FSMContext, repos: Repos)
 async def profile_photo(message: Message, state: FSMContext, repos: Repos):
     if not message.photo:
         await message.answer(
-            TEXTS.profile_texts.profile_create_photo_error,
-            reply_markup=ReplyKeyboardRemove(),
+            TEXTS.profile_texts.profile_create_photo_error
         )
     else:
         data = await state.get_value("photos", [])

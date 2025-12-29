@@ -1,7 +1,7 @@
 import json
 import logging
 
-from sqlalchemy import select, or_, and_, true, update
+from sqlalchemy import select, or_, and_, true, update, false
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.enums import SexEnum, OppositeSexEnum
@@ -70,27 +70,28 @@ class ProfileRepo(Repo):
     async def search_random_user(self, user_id: int, sex: SexEnum, opposite_sex: OppositeSexEnum) -> Profile|None:
         try:
             async with self.session.begin():
-                sex = OppositeSexEnum(sex.value)
-                opposite_sex = SexEnum(opposite_sex.value)
-                subq = (
+                subq1 = (
                     select(Action.target_id)
                     .where(
-                        or_(
-                            Action.user_id == user_id,
-                            Action.target_id == user_id
-                        )
+                        Action.user_id == user_id,
+                    )
+                )
+                subq2 = (
+                    select(Action.user_id)
+                    .where(
+                        Action.target_id == user_id
                     )
                 )
                 stmt = (
                     select(Profile)
                     .where(
-                        Profile.user_id.notin_(subq),
+                        Profile.user_id.notin_(subq1),
+                        Profile.user_id.notin_(subq2),
                         Profile.user_id != user_id,
                         Profile.is_active.is_(True),
-                        (Profile.sex == opposite_sex) if opposite_sex != OppositeSexEnum.BOTH else true(),
-                        or_(Profile.opposite_sex == OppositeSexEnum.BOTH, Profile.opposite_sex == sex)
+                        (Profile.sex == SexEnum(opposite_sex.value)) if opposite_sex != OppositeSexEnum.BOTH else true(),
+                        or_(Profile.opposite_sex == OppositeSexEnum.BOTH, Profile.opposite_sex == OppositeSexEnum(sex.value))
                     )
-                    .limit(1)
                 )
 
                 result = await self.session.execute(stmt)
