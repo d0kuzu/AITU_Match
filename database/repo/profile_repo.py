@@ -99,3 +99,26 @@ class ProfileRepo(Repo):
         except Exception as e:
             print(f"profile_repo.search_random_user error {user_id}: {e}")
 
+
+    async def save_profile(self, user_id: int, data: dict):
+        try:
+            async with self.session.begin():
+                profile = await self.session.get(Profile, user_id)
+
+                if data.get("name") is not None:
+                    profile.name = data["name"]
+                if data.get("age") is not None:
+                    profile.age = data["age"]
+                if data.get("description") is not None:
+                    profile.description = data["description"]
+
+
+                if data.get("sex") is not None:
+                    profile.sex = data["sex"]
+                if data.get("opposite_sex") is not None:
+                    profile.opposite_sex = data["opposite_sex"]
+                if data.get("uni") is not None:
+                    profile.uni = data["uni"]
+            return
+        except Exception as e:
+            logging.error(f"profile_repo.save_profile error {user_id}: {e}")
