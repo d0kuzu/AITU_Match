@@ -6,8 +6,8 @@ from .user_repo import UserRepo
 
 class Repos:
     def __init__(self, session):
-        self.user = UserRepo(session)
-        self.profile = ProfileRepo(session)
-        self.barcode = BarcodeRepo(session)
-        self.action = ActionRepo(session)
-        self.notification = NotificationRepo(session)
+        self.user: UserRepo = UserRepo(session)
+        self.profile: ProfileRepo = ProfileRepo(session)
+        self.barcode: BarcodeRepo = BarcodeRepo(session)
+        self.action: ActionRepo = ActionRepo(session)
+        self.notification: NotificationRepo = NotificationRepo(session)
