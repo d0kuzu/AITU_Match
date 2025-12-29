@@ -22,7 +22,7 @@ class NotificationRepo(Repo):
                     select(Notification)
                     .options(selectinload(Notification.action))
                     .order_by(Notification.id.desc())
-                )
+                ) # TODO: check user for is_active
                 result = await self.session.execute(stmt)
                 notifications = result.scalars().all()
             return notifications

@@ -86,6 +86,7 @@ class ProfileRepo(Repo):
                     .where(
                         Profile.user_id.notin_(subq),
                         Profile.user_id != user_id,
+                        Profile.is_active.is_(True),
                         (Profile.sex == opposite_sex) if opposite_sex != OppositeSexEnum.BOTH else true(),
                         or_(Profile.opposite_sex == OppositeSexEnum.BOTH, Profile.opposite_sex == sex)
                     )
