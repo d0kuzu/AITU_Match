@@ -2,7 +2,7 @@ import asyncio
 
 from aiogram import Router, F
 from aiogram.enums import ChatAction
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, FSInputFile, ReplyKeyboardRemove
 
@@ -19,7 +19,7 @@ from telegram.misc.texts import TEXTS
 router = Router()
 
 
-@router.message(CommandStart())
+@router.message(CommandStart(), ~StateFilter(MenuStates.deactivated))
 async def command_start(message: Message, state: FSMContext, repos: Repos):
     is_registered = await repos.user.is_exist(message.from_user.id)
 

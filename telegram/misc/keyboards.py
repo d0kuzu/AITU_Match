@@ -89,3 +89,11 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.edit_profile.back_to_menu)
         builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)
+
+
+    @staticmethod
+    def activate():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.menu_texts.activate)
+        builder.adjust(1)
+        return builder.as_markup(resize_keyboard=True)
