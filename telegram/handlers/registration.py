@@ -221,26 +221,6 @@ async def profile_description(message: Message, state: FSMContext, repos: Repos)
     await state.set_state(CreateProfileStates.photo)
 
 
-@router.message(CreateProfileStates.photo)
-async def profile_photo(message: Message, state: FSMContext, repos: Repos):
-    if not message.photo:
-        await message.answer(
-            TEXTS.profile_texts.profile_create_photo_error,
-            reply_markup=ReplyKeyboardRemove(),
-        )
-    else:
-        data = await state.get_value("photos", [])
-        if len(data) >= 3:
-            return
-        data.append(message.photo[-1].file_id)
-        await state.update_data(photos=data)
-        # await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
-
-        if len(data) >= 3:
-            await message.answer(TEXTS.profile_texts.profile_create_photo_saving, reply_markup=ReplyKeyboardRemove())
-            await save_profile_photos(message, state, repos)
-
-
 @router.message(CreateProfileStates.photo, F.text == TEXTS.profile_texts.profile_create_photo_save)
 async def save_profile_photos(message: Message, state: FSMContext, repos: Repos):
     data = await state.get_value("photos", [])
@@ -273,3 +253,23 @@ async def save_profile_photos(message: Message, state: FSMContext, repos: Repos)
 
     await state.set_state(MenuStates.main_menu)
     await show_menu(message, state)
+
+
+@router.message(CreateProfileStates.photo)
+async def profile_photo(message: Message, state: FSMContext, repos: Repos):
+    if not message.photo:
+        await message.answer(
+            TEXTS.profile_texts.profile_create_photo_error,
+            reply_markup=ReplyKeyboardRemove(),
+        )
+    else:
+        data = await state.get_value("photos", [])
+        if len(data) >= 3:
+            return
+        data.append(message.photo[-1].file_id)
+        await state.update_data(photos=data)
+        # await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
+
+        if len(data) >= 3:
+            await message.answer(TEXTS.profile_texts.profile_create_photo_saving, reply_markup=ReplyKeyboardRemove())
+            await save_profile_photos(message, state, repos)
