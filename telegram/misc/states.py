@@ -31,3 +31,7 @@ class SeeLikeNotificationsStates(StatesGroup):
 class MenuStates(StatesGroup):
     main_menu = State()
 
+
+class EditProfileStates(StatesGroup):
+    wait_what_to_edit = State()
+

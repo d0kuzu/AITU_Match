@@ -47,7 +47,6 @@ class ReplyKeyboards:
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.menu_texts.search_profiles_text)
         builder.button(text=TEXTS.menu_texts.edit_profile_text)
-        builder.button(text=TEXTS.menu_texts.go_to_deepseek_text)
         builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)
 
@@ -75,4 +74,17 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.search_profiles_texts.like)
         builder.button(text=TEXTS.search_profiles_texts.skip)
         builder.adjust(2)
+        return builder.as_markup(resize_keyboard=True)
+
+
+    @staticmethod
+    def ask_what_to_edit():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.edit_profile.edit_name)
+        builder.button(text=TEXTS.edit_profile.edit_age)
+        builder.button(text=TEXTS.edit_profile.edit_description)
+        builder.button(text=TEXTS.edit_profile.edit_images)
+        builder.button(text=TEXTS.edit_profile.edit_all)
+        builder.button(text=TEXTS.edit_profile.back_to_menu)
+        builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)

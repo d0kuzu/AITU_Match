@@ -95,6 +95,20 @@ class ErrorTexts:
 
 
 @dataclass(frozen=True)
+class EditProfileTexts:
+    ask_what_to_edit: str = "Выберите что хотите изменить"
+    edit_name: str = "Изменить имя"
+    edit_age: str = "Изменить возраст"
+    edit_description: str = "Изменить описание"
+    edit_images: str = "Изменить фото"
+    edit_all: str = "Заполнить анкету заново"
+    back_to_menu: str = "Вернутся в меню"
+    start_edit_all: str = "Начнем заполнять все с начала"
+
+    updated: str = "Данные обновлены"
+
+
+@dataclass(frozen=True)
 class Texts:
     welcome_texts: WelcomeTexts = WelcomeTexts()
     menu_texts: MenuTexts = MenuTexts()
@@ -102,6 +116,7 @@ class Texts:
     search_profiles_texts: SearchProfilesTexts = SearchProfilesTexts()
     notification_texts: NotificationTexts = NotificationTexts()
     error_texts: ErrorTexts = ErrorTexts()
+    edit_profile: EditProfileTexts = EditProfileTexts()
 
 
 TEXTS: Texts = Texts()
