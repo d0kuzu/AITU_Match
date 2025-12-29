@@ -84,6 +84,6 @@ async def save_edited_data(message: Message, state: FSMContext, repos: Repos):
     await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
     await asyncio.sleep(1)
 
-    await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
-    await asyncio.sleep(1)
+    await state.set_state(MenuStates.main_menu)
+    await show_menu(message, state)
 
