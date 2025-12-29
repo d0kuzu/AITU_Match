@@ -259,13 +259,15 @@ async def save_profile_photos(message: Message, state: FSMContext, repos: Repos)
         await message.answer(TEXTS.profile_texts.profile_create_photo_amount)
         return
 
+    await state.update_data(s3paths=s3paths)
+
     data = await state.get_data()
 
     if data.get("edit_one", None) is not None:
         await edit_profile.save_edited_data(message, state, repos)
         return
 
-    profile = await repos.profile.create(message.from_user.id, data, s3paths)
+    profile = await repos.profile.create(message.from_user.id, data)
 
     await send_photos(message.bot, s3paths, f"Анкета создана.\n{profile.name}, {profile.age} лет, {profile.uni}\n{profile.description}", message.from_user.id)
 

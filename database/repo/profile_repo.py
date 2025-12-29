@@ -15,7 +15,7 @@ class ProfileRepo(Repo):
         super().__init__(session)
 
 
-    async def create(self, user_id: int, user_data: dict[str, any], s3paths: list[str]) -> Profile|None:
+    async def create(self, user_id: int, user_data: dict[str, any]) -> Profile|None:
         try:
             async with self.session.begin():
                 stmt = Profile(
@@ -26,7 +26,7 @@ class ProfileRepo(Repo):
                     opposite_sex=OppositeSexEnum(user_data["opposite_sex"]),
                     uni=user_data["uni"],
                     description=user_data["description"],
-                    s3_path=json.dumps(s3paths),
+                    s3_path=json.dumps(user_data["s3paths"]),
                 )
 
                 profile = await self.session.merge(stmt)
@@ -114,11 +114,13 @@ class ProfileRepo(Repo):
 
 
                 if data.get("sex") is not None:
-                    profile.sex = data["sex"]
+                    profile.sex = SexEnum(data["sex"])
                 if data.get("opposite_sex") is not None:
-                    profile.opposite_sex = data["opposite_sex"]
+                    profile.opposite_sex = OppositeSexEnum(data["opposite_sex"])
                 if data.get("uni") is not None:
                     profile.uni = data["uni"]
+                if data.get("s3paths") is not None:
+                    profile.s3paths = json.dumps(data["s3paths"])
             return
         except Exception as e:
             logging.error(f"profile_repo.save_profile error {user_id}: {e}")

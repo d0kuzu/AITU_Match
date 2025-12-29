@@ -53,6 +53,7 @@ async def start_to_edit(message: Message, state: FSMContext):
                 reply_markup=ReplyKeyboardRemove(),
             )
             await state.set_state(CreateProfileStates.description)
+
         case TEXTS.edit_profile.edit_images:
             await state.update_data(edit_one=True)
 
@@ -61,6 +62,7 @@ async def start_to_edit(message: Message, state: FSMContext):
                 reply_markup=ReplyKeyboardRemove(),
             )
             await state.set_state(CreateProfileStates.photo)
+
         case TEXTS.edit_profile.edit_all:
             await message.answer(TEXTS.edit_profile.start_edit_all)
             await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
