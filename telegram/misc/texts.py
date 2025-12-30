@@ -57,7 +57,7 @@ class ProfileTexts:
 
     profile_create_description = "Напиши о себе: хобби, интересы и увлечения"
 
-    profile_create_photo = "Последний этап! Отправь фото для своей анкеты. Ты можешь прикрепить до 3х фото."
+    profile_create_photo = "Отправь фото для своей анкеты. Ты можешь прикрепить до 3х фото."
     profile_create_photo_amount = "Нужно отравить хотябы одно фото"
     profile_create_photo_save = "Сохранить фото"
     profile_create_photo_error = "Вряд ли это фотка! Попробуй еще раз"
@@ -109,6 +109,8 @@ class EditProfileTexts:
     edit_all: str = "Заполнить анкету заново"
     back_to_menu: str = "Вернутся в меню"
     start_edit_all: str = "Начнем заполнять все с начала"
+
+    ask_new_age: str = "Введи новый возраст"
 
     updated: str = "Данные обновлены"
 

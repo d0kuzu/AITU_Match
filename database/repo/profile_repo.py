@@ -122,7 +122,7 @@ class ProfileRepo(Repo):
                 if data.get("uni") is not None:
                     profile.uni = data["uni"]
                 if data.get("s3paths") is not None:
-                    profile.s3paths = json.dumps(data["s3paths"])
+                    profile.s3_path = json.dumps(data["s3paths"])
             return
         except Exception as e:
             logging.error(f"profile_repo.save_profile error {user_id}: {e}")
