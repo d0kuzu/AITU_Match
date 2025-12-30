@@ -12,6 +12,7 @@ class Profile(Base):
 
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"), primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, nullable=False)
     age: Mapped[int] = mapped_column(Integer, nullable=False)
     sex: Mapped[SexEnum] = mapped_column(Enum(SexEnum), nullable=False)
     opposite_sex: Mapped[OppositeSexEnum] = mapped_column(Enum(OppositeSexEnum), nullable=False)

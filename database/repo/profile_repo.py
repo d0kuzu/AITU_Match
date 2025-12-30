@@ -15,11 +15,12 @@ class ProfileRepo(Repo):
         super().__init__(session)
 
 
-    async def create(self, user_id: int, user_data: dict[str, any]) -> Profile|None:
+    async def create(self, user_id: int, username: str, user_data: dict[str, any]) -> Profile|None:
         try:
             async with self.session.begin():
                 stmt = Profile(
                     user_id=user_id,
+                    username=username,
                     name=user_data["name"],
                     age=user_data["age"],
                     sex=SexEnum(user_data["sex"]),

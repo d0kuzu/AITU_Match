@@ -54,12 +54,12 @@ async def show_next_notification(message: Message, state: FSMContext, repos: Rep
         logging.info(f"skip notification for {owner_id} cause None profile")
 
     text = f"Твоя анкета понравилась: \n\n{owner_profile.name}, {owner_profile.age}, {owner_profile.uni.value} - {owner_profile.description}"
-    if notification.action.message is not None or notification.action.message == "":
+    if notification.action.message is not None and notification.action.message != "":
         text += f'\n"{notification.action.message}"'
 
     await state.set_state(SeeLikeNotificationsStates.viewing_profile)
     await state.update_data(action_id=notification.action_id)
-    await state.update_data(viewing_profile_id=owner_id, viewing_profile_name=owner_profile.name)
+    await state.update_data(viewing_profile_id=owner_id, viewing_profile_username=owner_profile.username)
 
     await send_photos(message.bot, json.loads(owner_profile.s3_path), text, message.from_user.id)
 
@@ -78,10 +78,9 @@ async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
 
     if answer_type == ActionStatusEnum.ACCEPTED:
         owner_id = data.get("viewing_profile_id")
-        owner_name = data.get("viewing_profile_name")
+        owner_username = data.get("viewing_profile_username")
 
-        userlink = f'<a href="tg://user?id={owner_id}">{owner_name}</a>'
-        text = f"Отлично! Поспеши написать в чат первым. \n\nДержи ссылку на чат - {userlink}"
+        text = f"Отлично! Поспеши написать в чат первым. \n\nДержи ссылку на чат - @{owner_username}"
 
         await message.answer(text, parse_mode=ParseMode.HTML)
 
@@ -91,8 +90,7 @@ async def viewing_profile(message: Message, state: FSMContext, repos: Repos):
             logging.error(f"sending mutual like to owner({owner_id}) error: target profile({message.from_user.id}) not found")
             return
 
-        userlink = f'<a href="tg://user?id={message.from_user.id}">{profile.name}</a>'
-        text = f"У тебя взаимный лайк!\n{profile.name}, {profile.age}, {profile.uni.value} - {profile.description} \n\nДержи ссылку на чат - {userlink}."
+        text = f"У тебя взаимный лайк!\n{profile.name}, {profile.age}, {profile.uni.value} - {profile.description} \n\nДержи ссылку на чат - @{profile.username}."
         await send_photos(message.bot, json.loads(profile.s3_path), text, owner_id)
 
     await show_next_notification(message, state, repos)
