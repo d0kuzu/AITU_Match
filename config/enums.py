@@ -10,10 +10,6 @@ class OppositeSexEnum(Enum):
     FEMALE = "female"
     BOTH = "both"
 
-class UniEnum(Enum): # TODO: sinc with const.specializations
-    SE = "SE"
-    CS = "CS"
-
 class ActionEnum(Enum):
     like = "like"
     skip = "skip"
@@ -31,3 +27,22 @@ class FlowEnum(Enum):
 class NotificationStateEnum(Enum):
     WAITING = "waiting"
     SENT = "sent"
+
+class UniEnum(Enum):  # synced with const.specializations
+    SE = "SE"
+    MT = "MT"
+    CB = "CB"
+    BDA = "BDA"
+    MCS = "MCS"
+    BDH = "BDH"
+    CS = "CS"
+    SST = "SST"
+    ST = "ST"
+    DT = "DT"
+    DPA = "DPA"
+    AB = "AB"
+    IE = "IE"
+    IM = "IM"
+    DTNPE = "DTNPE"
+    IIT = "IIT"
+    EE = "EE"

@@ -92,6 +92,7 @@ class ProfileRepo(Repo):
                         (Profile.sex == SexEnum(opposite_sex.value)) if opposite_sex != OppositeSexEnum.BOTH else true(),
                         or_(Profile.opposite_sex == OppositeSexEnum.BOTH, Profile.opposite_sex == OppositeSexEnum(sex.value))
                     )
+                    .limit(1)
                 )
 
                 result = await self.session.execute(stmt)
