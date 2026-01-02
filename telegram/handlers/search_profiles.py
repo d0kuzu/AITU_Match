@@ -93,7 +93,7 @@ async def leave_profile_search(message: Message, state: FSMContext, repos: Repos
         return
 
     else:
-        await message.answer("Отправьте сообщение что хотите передать (только текст)")
+        await message.answer("Отправьте сообщение, что хотите передать (только текст)")
         await state.set_state(SearchProfilesStates.wait_message)
 
 
