@@ -2,7 +2,7 @@ import asyncio
 
 from aiogram import Router, F
 from aiogram.enums import ChatAction
-from aiogram.filters import CommandStart, StateFilter
+from aiogram.filters import CommandStart, StateFilter, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, FSInputFile, ReplyKeyboardRemove
 
@@ -17,6 +17,16 @@ from telegram.misc.states import WelcomeStatesGroup, CreateProfileStates, MenuSt
 from telegram.misc.texts import TEXTS
 
 router = Router()
+
+
+@router.message(Command("menu"))
+async def menu_command(message: Message, state: FSMContext, repos: Repos):
+    await command_start(message, state, repos)
+
+
+@router.message(Command("my_profile"))
+async def menu_command(message: Message, state: FSMContext, repos: Repos):
+    await edit_profile.ask_what_to_edit(message, state, repos)
 
 
 @router.message(CommandStart(), ~StateFilter(MenuStates.deactivated))
