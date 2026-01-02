@@ -40,6 +40,14 @@ class BotConfig:
 
 
 @dataclass(frozen=True)
+class RedisConfig:
+    host: str = env.str("REDIS_HOST")
+    port: int = env.int("REDIS_PORT")
+    db: int = env.int("REDIS_DB")
+
+
+@dataclass(frozen=True)
 class Environ:
     db: DatabaseConfig = DatabaseConfig()
     bot: BotConfig = BotConfig()
+    redis: RedisConfig = RedisConfig()
