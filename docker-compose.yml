@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  bot:
+    build: .
+    container_name: aiogram_bot
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # опционально (для подключения с хоста)
+
+volumes:
+  redis_data:
+  pg_data:
