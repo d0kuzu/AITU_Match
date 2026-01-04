@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from config.enums import ActionEnum, SexEnum, OppositeSexEnum
+from config.enums import ActionEnum, SexEnum, OppositeSexEnum, FlowEnum
 from database.repo import Repos
 from services.helpers.send_photos import send_photos
 from telegram.handlers.menu import show_menu
@@ -17,8 +17,6 @@ router = Router()
 
 @router.message(MenuStates.main_menu, F.text == TEXTS.menu_texts.search_profiles_text)
 async def start_profiles_search(message: Message, state: FSMContext, repos: Repos):
-    await state.clear()
-
     result = await repos.profile.get_sex_info(message.from_user.id)
 
     if result is None:
@@ -30,6 +28,7 @@ async def start_profiles_search(message: Message, state: FSMContext, repos: Repo
     await state.update_data(sex=sex.value, opposite_sex=opposite_sex.value)
 
     await message.answer(TEXTS.search_profiles_texts.start_search, reply_markup=ReplyKeyboards.profiles_search_actions())
+    await state.update_data(flow=FlowEnum.EASY.value)
     await send_next_profile(message, state, repos)
 
 

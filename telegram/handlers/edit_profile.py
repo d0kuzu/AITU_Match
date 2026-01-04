@@ -7,6 +7,7 @@ from aiogram.enums import ChatAction
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
+from config.enums import FlowEnum
 from database.repo import Repos
 from services.helpers.send_photos import send_photos
 from telegram.handlers import registration
@@ -30,6 +31,7 @@ async def ask_what_to_edit(message: Message, state: FSMContext, repos: Repos):
 
     await state.set_state(EditProfileStates.wait_what_to_edit)
     await message.answer(TEXTS.edit_profile.ask_what_to_edit, reply_markup=ReplyKeyboards.ask_what_to_edit())
+    await state.update_data(flow=FlowEnum.EASY.value)
 
 
 @router.message(EditProfileStates.wait_what_to_edit, F.text == TEXTS.edit_profile.back_to_menu)
