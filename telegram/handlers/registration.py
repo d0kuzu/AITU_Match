@@ -273,12 +273,21 @@ async def profile_photo(message: Message, state: FSMContext, repos: Repos):
         await message.answer(
             TEXTS.profile_texts.profile_create_photo_error
         )
-    else:
-        data = await state.get_value("photos", [])
-        if len(data) < 3:
-            data.append(message.photo[-1].file_id)
-            await state.update_data(photos=data)
-            await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
+        return
 
-            if len(data) >= 3:
-                await save_profile_photos(message, state, repos)
+    data = await state.get_data()
+    photos = data.get("photos", [])
+
+    if len(photos) >= 3:
+        return
+
+    photos.append(message.photo[-1].file_id)
+
+    await state.update_data(photos=photos)
+    await message.answer(
+        f"Загружено {len(photos)}/3",
+        reply_markup=ReplyKeyboards.save_photos()
+    )
+
+    if len(photos) == 3:
+        await save_profile_photos(message, state, repos)
