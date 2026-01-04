@@ -23,8 +23,10 @@ async def start(environ: Environ):
 
 
     bot = Bot(environ.bot.token)
-    storage = MemoryStorage()
-    dp = Dispatcher(bot=bot, storage=storage)
+    redis = Redis(host=environ.redis.host, port=environ.redis.port, db=environ.redis.db)
+    storage = RedisStorage(redis=redis)
+
+    dp = Dispatcher(storage=storage)
     await init_db(environ.db.asyncpg_url)
 
     await bot.set_my_commands([
