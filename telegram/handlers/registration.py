@@ -275,11 +275,10 @@ async def profile_photo(message: Message, state: FSMContext, repos: Repos):
         )
     else:
         data = await state.get_value("photos", [])
-        if len(data) >= 3:
-            return
-        data.append(message.photo[-1].file_id)
-        await state.update_data(photos=data)
-        # await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
+        if len(data) < 3:
+            data.append(message.photo[-1].file_id)
+            await state.update_data(photos=data)
+            await message.answer(f"Загружено {len(data)}/3", reply_markup=ReplyKeyboards.save_photos())
 
-        if len(data) >= 3:
-            await save_profile_photos(message, state, repos)
+            if len(data) >= 3:
+                await save_profile_photos(message, state, repos)
