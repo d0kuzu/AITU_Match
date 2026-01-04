@@ -31,9 +31,9 @@ async def notification_sender(bot: Bot, dp: Dispatcher):
                 target_data = await dp.storage.get_data(key)
 
                 last_activity = target_data.get("last_activity", datetime.now())
-                flow = target_data.get("flow", FlowEnum.EASY)
+                flow = target_data.get("flow", FlowEnum.EASY.value)
 
-                if flow == FlowEnum.HARD and datetime.now() - last_activity < timedelta(minutes=5):
+                if flow == FlowEnum.HARD.value and datetime.now() - last_activity < timedelta(minutes=5):
                     continue
 
                 await dp.storage.set_state(key, SeeLikeNotificationsStates.pending)
