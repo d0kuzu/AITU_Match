@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, FSInputFile, ReplyKeyboardRemove
 
 from database.repo import Repos
+from services.helpers.data_lock import get_lock
 from services.helpers.send_photos import send_photos
 from telegram.handlers import edit_profile
 from telegram.handlers.menu import show_menu
@@ -91,7 +92,7 @@ async def wait_user_barcode(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(WelcomeStatesGroup.welcome)
 async def profile_create_start(message: Message, state: FSMContext):
-    await message.answer(TEXTS.profile_texts.start_profile_create)
+    await message.answer(TEXTS.profile_texts.start_profile_create, reply_markup=ReplyKeyboardRemove())
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
     await asyncio.sleep(2)
 
@@ -270,24 +271,27 @@ async def save_profile_photos(message: Message, state: FSMContext, repos: Repos)
 @router.message(CreateProfileStates.photo)
 async def profile_photo(message: Message, state: FSMContext, repos: Repos):
     if not message.photo:
+        await message.answer(TEXTS.profile_texts.profile_create_photo_error)
+        return
+
+    lock = get_lock(message.from_user.id)
+
+    async with lock:
+        data = await state.get_data()
+        photos = data.get("photos", [])
+
+        if len(photos) >= 3:
+            await message.answer("Можно загрузить не более 3 фото")
+            return
+
+        photos.append(message.photo[-1].file_id)
+
+        await state.update_data(photos=photos)
+
         await message.answer(
-            TEXTS.profile_texts.profile_create_photo_error
+            f"Загружено {len(photos)}/3",
+            reply_markup=ReplyKeyboards.save_photos()
         )
-        return
 
-    data = await state.get_data()
-    photos = data.get("photos", [])
-
-    if len(photos) >= 3:
-        return
-
-    photos.append(message.photo[-1].file_id)
-
-    await state.update_data(photos=photos)
-    await message.answer(
-        f"Загружено {len(photos)}/3",
-        reply_markup=ReplyKeyboards.save_photos()
-    )
-
-    if len(photos) == 3:
-        await save_profile_photos(message, state, repos)
+        if len(photos) == 3:
+            await save_profile_photos(message, state, repos)
