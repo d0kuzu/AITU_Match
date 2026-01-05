@@ -10,5 +10,5 @@ class Paths:
 
     welcome_photo = _bot_photo_dir / "welcome.jpeg"
 
-
 PATHS = Paths()
+PATHS.user_photo_dir.mkdir(parents=True, exist_ok=True)

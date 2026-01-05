@@ -5,6 +5,8 @@ services:
     build: .
     container_name: aiogram_bot
     restart: always
+    volumes:
+      - ./media/user:/app/media/user
     env_file:
       - .env
     depends_on:
@@ -27,7 +29,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"  # опционально (для подключения с хоста)
+      - "5432:5432"
 
 volumes:
   redis_data:
