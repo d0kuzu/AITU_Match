@@ -55,7 +55,7 @@ async def show_next_notification(message: Message, state: FSMContext, repos: Rep
 
     text = f"Твоя анкета понравилась: \n\n{owner_profile.name}, {owner_profile.age}, {owner_profile.uni.value} - {owner_profile.description}"
     if notification.action.message is not None and notification.action.message != "":
-        text += f'\n"{notification.action.message}"'
+        text += f'\n\nВам сообщение \n«{notification.action.message}»'
 
     await state.set_state(SeeLikeNotificationsStates.viewing_profile)
     await state.update_data(action_id=notification.action_id)
