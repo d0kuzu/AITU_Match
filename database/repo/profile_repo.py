@@ -77,17 +77,10 @@ class ProfileRepo(Repo):
                         Action.user_id == user_id,
                     )
                 )
-                subq2 = (
-                    select(Action.user_id)
-                    .where(
-                        Action.target_id == user_id
-                    )
-                )
                 stmt = (
                     select(Profile)
                     .where(
                         Profile.user_id.notin_(subq1),
-                        Profile.user_id.notin_(subq2),
                         Profile.user_id != user_id,
                         Profile.is_active.is_(True),
                         (Profile.sex == SexEnum(opposite_sex.value)) if opposite_sex != OppositeSexEnum.BOTH else true(),
