@@ -15,13 +15,15 @@ class WelcomeTexts:
 _Нажми "Начать", чтобы создать свою анкету или посмотреть другие!_ 
 """
     text_main_menu: str = """
-    ┏━━━━━━ *AituMATCH* ━━━━━━┓
+┏━━━ <b>AituMATCH</b> ━━━┓
 
-      ━━ Знакомься 👱🏿‍♂️
+━━ <a href="https://t.me/aitumatch">Новостной канал</a>
 
-      ━━ Оформи анкету 🎨
+━━ <a href="https://t.me/aitumatch_bot">Знакомься 👩‍❤️‍👨</a>
 
-    ┗━ Выбирай кнопку ниже ━┛
+━━ <a href="https://t.me/aitumatch_bot">Оформи анкету 🎨</a>
+
+┗━ Выбирай кнопку ниже ━┛
     """
     ask_barcode: str = "Ты еще не зарегестрирован! Введи свой barcode и присоединяйся!"
 
