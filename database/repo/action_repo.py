@@ -1,6 +1,7 @@
 import logging
+from typing import Any, Coroutine, Sequence
 
-from sqlalchemy import update
+from sqlalchemy import update, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.enums import ActionEnum, ActionStatusEnum
@@ -43,3 +44,27 @@ class ActionRepo(Repo):
         except Exception as e:
             logging.error(f"action_repo.change_action_status error: {e}")
 
+
+    async def get_all_actions(self) -> Sequence[Action] | None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    select(Action)
+                )
+                actions = await self.session.scalars(stmt)
+                return actions.all()
+        except Exception as e:
+            print(f'action_repo.get_all_actions error {e}')
+            return None
+
+
+    async def delete_action(self, action_id: int):
+        try:
+            async with self.session.begin():
+                stmt = (
+                    delete(Action)
+                    .where(Action.id == action_id)
+                )
+                await self.session.execute(stmt)
+        except Exception as e:
+            print(f'action_repo.delete_action error {e}')

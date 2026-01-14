@@ -1,4 +1,6 @@
-from sqlalchemy import Integer, ForeignKey, BigInteger, Boolean, text, UniqueConstraint, Enum, Index, Text
+from datetime import datetime
+
+from sqlalchemy import Integer, ForeignKey, BigInteger, DateTime, text, UniqueConstraint, Enum, Index, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from config.enums import ActionEnum, ActionStatusEnum
@@ -17,6 +19,8 @@ class Action(Base):
     status: Mapped[ActionStatusEnum] = mapped_column(Enum(ActionStatusEnum), nullable=False)
 
     message: Mapped[str] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=func.now())
 
     __table_args__ = (
         Index("idx_user_id", "user_id"),

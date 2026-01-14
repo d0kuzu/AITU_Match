@@ -5,6 +5,7 @@ from config.config import Environ
 from database import repo
 from database.session import get_db
 from telegram.handlers import registration, search_profiles, like_notification, edit_profile, deactivate
+from telegram.jobs.actions_refresher import actions_refresher
 from telegram.jobs.notification import notification_sender
 from telegram.middlewares.env_middleware import EnvMiddleware
 from telegram.middlewares.last_activity_middleware import LastActivityMiddleware
@@ -16,7 +17,7 @@ class TgRegister:
         self.dp = dp
         self.bot = bot
 
-        self.scheduler = None
+        self.scheduler: AsyncIOScheduler|None = None
         self.env = env
 
     async def register(self):
@@ -66,30 +67,11 @@ class TgRegister:
             minutes=1,
             args=[self.bot, self.dp],
         )
-        ### OLD STRUCTURE ###
-        # self.scheduler.add_job(
-        #     func=counter_task,
-        #     trigger=morning_trigger,
-        #     args=[self.bot, self.user_repo],
-        # )
-        # self.scheduler.add_job(
-        #     func=bot_message_task,
-        #     trigger=afternoon_trigger,
-        #     args=[self.bot, self.dp.storage, self.user_repo, AFFIRMATION_TASK_PROMPT],
-        # )
-        # self.scheduler.add_job(
-        #     func=bot_message_task,
-        #     trigger=evening_trigger,
-        #     args=[self.bot, self.dp.storage, self.user_repo, QUESTION_TASK_PROMPT],
-        # )
-        # self.scheduler.add_job(
-        #     func=bot_message_task,
-        #     trigger=twilight_trigger,
-        #     args=[self.bot, self.dp.storage, self.user_repo, AFFIRMATION_TASK_PROMPT],
-        # )
-        # self.scheduler.add_job(
-        #     func=ask_if_held_out,
-        #     trigger=ask_trigger,
-        #     args=[self.bot, self.user_repo],
-        # )
-        pass
+
+        self.scheduler.add_job(
+            func=actions_refresher,
+            trigger="cron",
+            hour=0,
+            minute=0,
+            args=[self.bot, self.dp],
+        )
