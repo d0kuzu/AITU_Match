@@ -54,7 +54,7 @@ class ActionRepo(Repo):
                 actions = await self.session.scalars(stmt)
                 return actions.all()
         except Exception as e:
-            print(f'action_repo.get_all_actions error {e}')
+            logging.error(f'action_repo.get_all_actions error {e}')
             return None
 
 
@@ -67,4 +67,4 @@ class ActionRepo(Repo):
                 )
                 await self.session.execute(stmt)
         except Exception as e:
-            print(f'action_repo.delete_action error {e}')
+            logging.error(f'action_repo.delete_action error {e}')

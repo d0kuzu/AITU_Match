@@ -1,6 +1,7 @@
 import logging
+from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import Barcode
@@ -25,3 +26,13 @@ class BarcodeRepo(Repo):
         except Exception as e:
             logging.error(f"barcode_repo.is_exist error {code}: {e}")
             return False
+
+    async def add_multiple(self, values: list[dict[str, Any]]) -> None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    insert(Barcode)
+                )
+                await self.session.execute(stmt, values)
+        except Exception as e:
+            logging.error(f"barcode_repo.add_multiple error {e}")

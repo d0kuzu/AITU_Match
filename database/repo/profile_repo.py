@@ -65,7 +65,7 @@ class ProfileRepo(Repo):
 
                 return row
         except Exception as e:
-            print(f"profile_repo.get_sex_info error {user_id}: {e}")
+            logging.error(f"profile_repo.get_sex_info error {user_id}: {e}")
 
 
     async def search_random_user(self, user_id: int, sex: SexEnum, opposite_sex: OppositeSexEnum) -> Profile|None:
@@ -94,7 +94,7 @@ class ProfileRepo(Repo):
 
                 return profile
         except Exception as e:
-            print(f"profile_repo.search_random_user error {user_id}: {e}")
+            logging.error(f"profile_repo.search_random_user error {user_id}: {e}")
 
 
     async def save_profile(self, user_id: int, data: dict):

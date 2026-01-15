@@ -84,5 +84,5 @@ class NotificationRepo(Repo):
                 notification = result.scalar_one_or_none()
                 return notification
         except Exception as e:
-            print(f"notification_repo.get_notification_by_id error {id}: {e}")
+            logging.error(f"notification_repo.get_notification_by_id error {id}: {e}")
             return None
