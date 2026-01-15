@@ -38,7 +38,7 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos, s
     data = await state.get_data()
 
     if show_again:
-        profile = repos.profile.search_by_user_id(data.get("current_viewing_tg_id"))
+        profile = await repos.profile.search_by_user_id(data.get("current_viewing_tg_id"))
     else:
         profile = await repos.profile.search_random_user(message.from_user.id, SexEnum(data.get("sex")), OppositeSexEnum(data.get("opposite_sex")))
 
