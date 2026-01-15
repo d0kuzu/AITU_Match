@@ -134,7 +134,8 @@ async def back_to_liking(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(ComplainStates.wait_comment, F.text == TEXTS.complain_texts.back)
 async def back_to_reasons(message: Message, state: FSMContext):
-    await wait_complain_reason(message, state)
+    await message.answer(TEXTS.complain_texts.ask_reason, reply_markup=ReplyKeyboards.complain_reasons())
+    await state.set_state(ComplainStates.wait_reason)
 
 
 @router.message(ComplainStates.wait_comment)
