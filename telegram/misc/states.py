@@ -36,3 +36,7 @@ class MenuStates(StatesGroup):
 class EditProfileStates(StatesGroup):
     wait_what_to_edit = State()
 
+
+class AdminBarcodeStates(StatesGroup):
+    wait_barcodes = State()
+
