@@ -10,9 +10,10 @@ from telegram.misc.states import AdminBarcodeStates
 router = Router()
 router.message.filter(AdminFilter())
 
-@router.message(Command("add_barcodes"))
+@router.message(Command("test"))
 async def add_barcodes_start(message: Message, state: FSMContext):
-    pass
+    data = await state.get_data()
+    await message.asnwer(data.get("last_activity"))
 
 @router.message(Command("add_barcodes"))
 async def add_barcodes_start(message: Message, state: FSMContext):
