@@ -97,6 +97,7 @@ class ComplainTexts:
     back: str = "Назад"
     add_comment: str = "Добавьте коментарий к жалобе"
     complain_sent: str = "Жалоба отправлена"
+    continue_text: str = "Продолжим"
 
 
 @dataclass(frozen=True)

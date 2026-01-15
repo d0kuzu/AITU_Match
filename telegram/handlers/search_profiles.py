@@ -129,6 +129,7 @@ async def wait_complain_reason(message: Message, state: FSMContext):
 
 @router.message(ComplainStates.wait_reason, F.text == TEXTS.complain_texts.back)
 async def back_to_liking(message: Message, state: FSMContext, repos: Repos):
+    await message.answer(TEXTS.complain_texts.continue_text, reply_markup=ReplyKeyboards.profiles_search_actions())
     await send_next_profile(message, state, repos, True)
 
 
