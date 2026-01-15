@@ -4,7 +4,7 @@ import logging
 from sqlalchemy import select, or_, and_, true, update, false
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config.enums import SexEnum, OppositeSexEnum
+from config.enums import SexEnum, OppositeSexEnum, ActionEnum
 from database.models.action import Action
 from database.models.profile import Profile
 from database.repo.repo import Repo
@@ -74,7 +74,12 @@ class ProfileRepo(Repo):
                 subq1 = (
                     select(Action.target_id)
                     .where(
-                        Action.user_id == user_id,
+                        or_(
+                            Action.user_id == user_id,
+                            and_(
+                                Action.target_id == user_id,
+                                Action.action_type == ActionEnum.skip
+                            )),
                     )
                 )
                 stmt = (
