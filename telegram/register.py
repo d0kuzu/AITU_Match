@@ -73,5 +73,5 @@ class TgRegister:
             trigger="cron",
             hour=0,
             minute=0,
-            args=[self.bot, self.dp],
+            args=[],
         )
