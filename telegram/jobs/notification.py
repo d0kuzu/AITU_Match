@@ -18,6 +18,7 @@ async def notification_sender(bot: Bot, dp: Dispatcher):
         repos = Repos(session)
 
         notifications = await repos.notification.get_available()
+        logging.info(f"NOTIFICATIONS LOADED: -----------{notifications}")
 
         should_notify_users = {}
 
