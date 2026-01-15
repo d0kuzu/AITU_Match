@@ -22,7 +22,7 @@ async def add_barcodes(message: Message, repos: Repos):
     errored = []
     to_add = []
     for barcode in barcodes:
-        if len(barcode) != 6 and not barcode.isdigit():
+        if len(barcode) != 6 or not barcode.isdigit():
             errored.append({"code": barcode, "reason": "Invalid barcode"})
             continue
         if await repos.barcode.is_exist(barcode):
