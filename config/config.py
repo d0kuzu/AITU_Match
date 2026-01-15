@@ -36,7 +36,7 @@ class DatabaseConfig:
 class BotConfig:
     token: str = env.str("BOT_TOKEN")
     logging_level: int = env.int("LOGGING_LEVEL")
-    admin_ids: set[int] = (7278477437,)
+    admin_ids: set[int] = (7278477437, 910631008, )
 
 
 @dataclass(frozen=True)
