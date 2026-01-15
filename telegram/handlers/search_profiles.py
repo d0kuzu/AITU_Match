@@ -1,6 +1,8 @@
+import asyncio
 import json
 
 from aiogram import Router, F
+from aiogram.enums import ChatAction
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -9,7 +11,7 @@ from database.repo import Repos
 from services.helpers.send_photos import send_photos
 from telegram.handlers.menu import show_menu
 from telegram.misc.keyboards import ReplyKeyboards
-from telegram.misc.states import MenuStates, SearchProfilesStates
+from telegram.misc.states import MenuStates, SearchProfilesStates, ComplainStates
 from telegram.misc.texts import TEXTS
 
 router = Router()
@@ -32,9 +34,13 @@ async def start_profiles_search(message: Message, state: FSMContext, repos: Repo
     await send_next_profile(message, state, repos)
 
 
-async def send_next_profile(message: Message, state: FSMContext, repos: Repos):
+async def send_next_profile(message: Message, state: FSMContext, repos: Repos, show_again=False):
     data = await state.get_data()
-    profile = await repos.profile.search_random_user(message.from_user.id, SexEnum(data.get("sex")), OppositeSexEnum(data.get("opposite_sex")))
+
+    if show_again:
+        profile = repos.profile.search_by_user_id(data.get("current_viewing_tg_id"))
+    else:
+        profile = await repos.profile.search_random_user(message.from_user.id, SexEnum(data.get("sex")), OppositeSexEnum(data.get("opposite_sex")))
 
     if profile:
         await state.update_data(current_viewing_tg_id=profile.user_id)
@@ -76,7 +82,8 @@ async def leave_profile_search(message: Message, state: FSMContext, repos: Repos
 
     target_id = data.get("current_viewing_tg_id")
     action = ActionEnum.like if message.text == TEXTS.search_profiles_texts.like \
-        else ActionEnum.skip if message.text == TEXTS.search_profiles_texts.skip else ActionEnum.message
+        else ActionEnum.skip if message.text == TEXTS.search_profiles_texts.skip \
+        else ActionEnum.message if message.text == TEXTS.search_profiles_texts.message else ActionEnum.complain
 
     if action == ActionEnum.like:
         action_id = await repos.action.create_action(message.from_user.id, target_id, ActionEnum.like)
@@ -91,9 +98,13 @@ async def leave_profile_search(message: Message, state: FSMContext, repos: Repos
         await send_next_profile(message, state, repos)
         return
 
-    else:
-        await message.answer("Отправьте сообщение, что хотите передать (только текст)")
+    elif action == ActionEnum.message:
+        await message.answer(TEXTS.search_profiles_texts.message_text)
         await state.set_state(SearchProfilesStates.wait_message)
+
+    else:
+        await message.answer(TEXTS.complain_texts.ask_reason, reply_markup=ReplyKeyboards.complain_reasons())
+        await state.set_state(ComplainStates.wait_reason)
 
 
 @router.message(SearchProfilesStates.wait_message)
@@ -104,5 +115,39 @@ async def send_message(message: Message, state: FSMContext, repos: Repos):
 
     action_id = await repos.action.create_action(message.from_user.id, target_id, ActionEnum.message, message.text)
     await repos.notification.create_notification(action_id)
+
+    await send_next_profile(message, state, repos)
+
+
+@router.message(ComplainStates.wait_reason, F.text.in_([TEXTS.complain_texts.mature_content, TEXTS.complain_texts.sell_add, TEXTS.complain_texts.do_not_like, TEXTS.complain_texts.other]))
+async def wait_complain_reason(message: Message, state: FSMContext):
+    await message.answer(TEXTS.complain_texts.add_comment, reply_markup=ReplyKeyboards.go_back())
+    await state.set_state(ComplainStates.wait_comment)
+    await state.update_data(reason=message.text)
+
+
+@router.message(ComplainStates.wait_reason, F.text == TEXTS.complain_texts.back)
+async def back_to_liking(message: Message, state: FSMContext, repos: Repos):
+    await send_next_profile(message, state, repos, True)
+
+
+@router.message(ComplainStates.wait_comment, F.text == TEXTS.complain_texts.back)
+async def back_to_reasons(message: Message, state: FSMContext):
+    await wait_complain_reason(message, state)
+
+
+@router.message(ComplainStates.wait_comment)
+async def send_complaint(message: Message, state: FSMContext, repos: Repos):
+    data = await state.get_data()
+    reason = data.get("reason")
+    target_id = data.get("current_viewing_tg_id")
+    comment = message.text
+
+    await repos.complaint.create(target_id, reason, comment)
+
+    await message.answer(TEXTS.complain_texts.complain_sent, reply_markup=ReplyKeyboards.profiles_search_actions())
+
+    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
+    await asyncio.sleep(0.5)
 
     await send_next_profile(message, state, repos)

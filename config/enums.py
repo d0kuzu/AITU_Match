@@ -14,6 +14,7 @@ class ActionEnum(Enum):
     like = "like"
     skip = "skip"
     message = "message"
+    complain = "complain"
 
 class ActionStatusEnum(Enum):
     PENDING = "pending"

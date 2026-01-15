@@ -58,6 +58,7 @@ class ReplyKeyboards:
         builder.button(text=TEXTS.search_profiles_texts.message)
         builder.button(text=TEXTS.search_profiles_texts.skip)
         builder.button(text=TEXTS.search_profiles_texts.leave)
+        builder.button(text=TEXTS.search_profiles_texts.complain)
         builder.adjust(4)
         return builder.as_markup(resize_keyboard=True)
 
@@ -95,5 +96,25 @@ class ReplyKeyboards:
     def activate():
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.menu_texts.activate)
+        builder.adjust(1)
+        return builder.as_markup(resize_keyboard=True)
+
+
+    @staticmethod
+    def complain_reasons():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.complain_texts.mature_content)
+        builder.button(text=TEXTS.complain_texts.sell_add)
+        builder.button(text=TEXTS.complain_texts.do_not_like)
+        builder.button(text=TEXTS.complain_texts.other)
+        builder.button(text=TEXTS.complain_texts.back)
+        builder.adjust(1)
+        return builder.as_markup(resize_keyboard=True)
+
+
+    @staticmethod
+    def go_back():
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=TEXTS.complain_texts.back)
         builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)

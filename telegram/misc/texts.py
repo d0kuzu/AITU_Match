@@ -83,6 +83,20 @@ class SearchProfilesTexts:
     skip: str = "👎"
     leave: str = "💤"
     start_search: str = "Начинаем поиск анкет..."
+    message_text: str = "Отправьте сообщение, что хотите передать (только текст)"
+    complain: str = "Пожаловаться"
+
+
+@dataclass(frozen=True)
+class ComplainTexts:
+    ask_reason: str = "Укажите причину жалобы кнопками 👇"
+    mature_content: str = "🔞 Материал для взрослых"
+    sell_add: str = "💰 Продажа товаров и услуг"
+    do_not_like: str = "💩 Не нравится"
+    other: str = "🦨 Другое"
+    back: str = "Назад"
+    add_comment: str = "Добавьте коментарий к жалобе"
+    complain_sent: str = "Жалоба отправлена"
 
 
 @dataclass(frozen=True)
@@ -122,6 +136,7 @@ class Texts:
     menu_texts: MenuTexts = MenuTexts()
     profile_texts: ProfileTexts = ProfileTexts()
     search_profiles_texts: SearchProfilesTexts = SearchProfilesTexts()
+    complain_texts: ComplainTexts = ComplainTexts()
     notification_texts: NotificationTexts = NotificationTexts()
     error_texts: ErrorTexts = ErrorTexts()
     edit_profile: EditProfileTexts = EditProfileTexts()

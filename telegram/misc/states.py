@@ -40,3 +40,8 @@ class EditProfileStates(StatesGroup):
 class AdminBarcodeStates(StatesGroup):
     wait_barcodes = State()
 
+
+class ComplainStates(StatesGroup):
+    wait_reason = State()
+    wait_comment = State()
+
