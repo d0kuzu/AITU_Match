@@ -31,7 +31,7 @@ async def start(environ: Environ):
 
     await bot.set_my_commands([
         BotCommand(command='menu', description='В меню'),
-        BotCommand(command='my_profile', description='Мой анкета')
+        BotCommand(command='my_profile', description='Моя анкета')
     ])
 
     tg_register = TgRegister(dp, bot, environ)
