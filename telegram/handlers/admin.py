@@ -15,7 +15,7 @@ async def add_barcodes_start(message: Message, state: FSMContext):
     await state.set_state(AdminBarcodeStates.wait_barcodes)
     await message.answer("Отправьте баркоды в формате '111111,222222' \n\n-без пробелв \n-баркод свободен \n-длина баркода 6 цифр")
 
-@router.message()
+@router.message(AdminBarcodeStates.wait_barcodes)
 async def add_barcodes(message: Message, state: FSMContext, repos: Repos):
     barcodes: list[str] = message.text.split(',')
 
