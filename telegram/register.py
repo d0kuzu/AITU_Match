@@ -33,12 +33,12 @@ class TgRegister:
         self.scheduler = scheduler
 
     def _register_handlers(self):
+        self.dp.include_routers(admin.router)
         self.dp.include_routers(registration.router)
         self.dp.include_routers(search_profiles.router)
         self.dp.include_routers(like_notification.router)
         self.dp.include_routers(edit_profile.router)
         self.dp.include_routers(deactivate.router)
-        self.dp.include_routers(admin.router)
 
     def _register_middlewares(self):
         repo_middleware = RepoMiddleware()
