@@ -144,6 +144,7 @@ async def send_complaint(message: Message, state: FSMContext, repos: Repos):
     comment = message.text
 
     await repos.complaint.create(target_id, reason, comment)
+    await repos.action.create_action(message.from_user.id, target_id, ActionEnum.complain)
 
     await message.answer(TEXTS.complain_texts.complain_sent, reply_markup=ReplyKeyboards.profiles_search_actions())
 
