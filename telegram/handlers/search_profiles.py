@@ -71,7 +71,7 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos, s
         await show_menu(message, state)
 
 
-@router.message(SearchProfilesStates.viewing_profile, F.text.in_([TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.message, TEXTS.search_profiles_texts.skip, TEXTS.search_profiles_texts.leave]))
+@router.message(SearchProfilesStates.viewing_profile, F.text.in_([TEXTS.search_profiles_texts.like, TEXTS.search_profiles_texts.message, TEXTS.search_profiles_texts.skip, TEXTS.search_profiles_texts.leave, TEXTS.search_profiles_texts.complain]))
 async def leave_profile_search(message: Message, state: FSMContext, repos: Repos):
     if message.text == TEXTS.search_profiles_texts.leave:
         await state.set_state(MenuStates.main_menu)
