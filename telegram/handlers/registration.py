@@ -1,7 +1,7 @@
 import asyncio
 
 from aiogram import Router, F
-from aiogram.enums import ChatAction
+from aiogram.enums import ChatAction, ParseMode
 from aiogram.filters import CommandStart, StateFilter, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, FSInputFile, ReplyKeyboardRemove
@@ -55,7 +55,7 @@ async def command_start(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(WelcomeStatesGroup.ask_barcode)
 async def user_barcode(message: Message, state: FSMContext):
-    await message.answer(TEXTS.welcome_texts.text_main_menu, reply_markup=ReplyKeyboardRemove())
+    await message.answer(TEXTS.welcome_texts.text_main_menu, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardRemove())
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
     await asyncio.sleep(1)
 
