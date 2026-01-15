@@ -101,6 +101,7 @@ async def leave_profile_search(message: Message, state: FSMContext, repos: Repos
     elif action == ActionEnum.message:
         await message.answer(TEXTS.search_profiles_texts.message_text)
         await state.set_state(SearchProfilesStates.wait_message)
+        return
 
     else:
         await message.answer(TEXTS.complain_texts.ask_reason, reply_markup=ReplyKeyboards.complain_reasons())
