@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from aiogram import Router, F
 from aiogram.enums import ChatAction, ParseMode
@@ -6,6 +7,7 @@ from aiogram.filters import CommandStart, StateFilter, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, FSInputFile, ReplyKeyboardRemove
 
+from config.enums import FlowEnum
 from database.repo import Repos
 from services.helpers.data_lock import get_lock
 from services.helpers.send_photos import send_photos
@@ -27,7 +29,20 @@ async def menu_command(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(Command("my_profile"))
 async def menu_command(message: Message, state: FSMContext, repos: Repos):
-    await edit_profile.ask_what_to_edit(message, state, repos)
+    await message.answer(TEXTS.welcome_texts.show_profile, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboards.main_menu())
+
+    await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+    await asyncio.sleep(0.25)
+
+    profile = await repos.profile.search_by_user_id(message.from_user.id)
+
+    await send_photos(message.bot, json.loads(profile.s3_path),
+                      f"{profile.name}, {profile.age} лет, {profile.uni} - {profile.description}",
+                      message.from_user.id)
+
+    await state.update_data(flow=FlowEnum.EASY.value)
+    await state.clear()
+    await state.set_state(MenuStates.main_menu)
 
 
 @router.message(CommandStart(), ~StateFilter(MenuStates.deactivated))
@@ -49,7 +64,6 @@ async def command_start(message: Message, state: FSMContext, repos: Repos):
         if not profile:
             await profile_create_start(message, state)
         else:
-            await state.set_state(MenuStates.main_menu)
             await show_menu(message, state)
 
 
