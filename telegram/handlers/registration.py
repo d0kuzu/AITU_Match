@@ -29,7 +29,7 @@ async def menu_command(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(Command("my_profile"))
 async def menu_command(message: Message, state: FSMContext, repos: Repos):
-    await message.answer(TEXTS.welcome_texts.show_profile)
+    await message.answer(TEXTS.welcome_texts.show_profile, reply_markup=ReplyKeyboardRemove())
 
     profile = await repos.profile.search_by_user_id(message.from_user.id)
 
