@@ -55,11 +55,7 @@ async def add_barcodes(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(AdminActionsStates.wait_username)
 async def clear_actions(message: Message, state: FSMContext, repos: Repos):
-    username = message.text
-
-    if username.count("@") != 1:
-        await message.answer("непохоже на юзернейм")
-        return
+    username = message.text.replace("@", "")
 
     profile = await repos.profile.search_by_username(username)
     if not profile:
