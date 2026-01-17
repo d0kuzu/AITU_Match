@@ -48,7 +48,7 @@ async def send_next_profile(message: Message, state: FSMContext, repos: Repos, s
         try:
             await send_photos(message.bot, json.loads(profile.s3_path),
                               (
-                                  f"{profile.name}, {profile.age} лет, {profile.uni.value}\n"
+                                  f"{profile.name}, {profile.age} лет, {profile.uni.value} - "
                                   f"{profile.description}"
                               ), message.from_user.id)
 

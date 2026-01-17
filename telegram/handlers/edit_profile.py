@@ -26,7 +26,7 @@ async def ask_what_to_edit(message: Message, state: FSMContext, repos: Repos):
         logging.error(f"ask_what_to_edit, get_profile error {message.from_user.id}")
         return
     await send_photos(message.bot, json.loads(profile.s3_path),
-                      f"{profile.name}, {profile.age} лет, {profile.uni.value}\n{profile.description}",
+                      f"{profile.name}, {profile.age} лет, {profile.uni.value} - {profile.description}",
                       message.from_user.id)
 
     await state.set_state(EditProfileStates.wait_what_to_edit)
