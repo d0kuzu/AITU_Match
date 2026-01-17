@@ -30,6 +30,7 @@ class SeeLikeNotificationsStates(StatesGroup):
 
 class MenuStates(StatesGroup):
     main_menu = State()
+    profile = State()
     deactivated = State()
 
 

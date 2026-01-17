@@ -29,7 +29,7 @@ async def menu_command(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(Command("my_profile"))
 async def menu_command(message: Message, state: FSMContext, repos: Repos):
-    await message.answer(TEXTS.welcome_texts.show_profile, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboards.main_menu())
+    await message.answer(TEXTS.welcome_texts.show_profile)
 
     profile = await repos.profile.search_by_user_id(message.from_user.id)
 
@@ -39,7 +39,7 @@ async def menu_command(message: Message, state: FSMContext, repos: Repos):
 
     await state.update_data(flow=FlowEnum.EASY.value)
     await state.clear()
-    await state.set_state(MenuStates.main_menu)
+    await state.set_state(MenuStates.profile)
 
 
 @router.message(CommandStart(), ~StateFilter(MenuStates.deactivated))
