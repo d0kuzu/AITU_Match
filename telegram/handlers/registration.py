@@ -66,7 +66,7 @@ async def command_start(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(WelcomeStatesGroup.ask_barcode)
 async def user_barcode(message: Message, state: FSMContext):
-    await message.answer(TEXTS.welcome_texts.text_main_menu, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardRemove())
+    await message.answer(TEXTS.welcome_texts.text_main_menu, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
     await asyncio.sleep(1)
 
