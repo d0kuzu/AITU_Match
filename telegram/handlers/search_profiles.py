@@ -120,7 +120,7 @@ async def send_message(message: Message, state: FSMContext, repos: Repos):
     await send_next_profile(message, state, repos)
 
 
-@router.message(ComplainStates.wait_reason, F.text.in_([TEXTS.complain_texts.mature_content, TEXTS.complain_texts.sell_add, TEXTS.complain_texts.do_not_like, TEXTS.complain_texts.other]))
+@router.message(ComplainStates.wait_reason, F.text.in_([TEXTS.complain_texts.mature_content, TEXTS.complain_texts.sell_add, TEXTS.complain_texts.other]))
 async def wait_complain_reason(message: Message, state: FSMContext):
     await message.answer(TEXTS.complain_texts.add_comment, reply_markup=ReplyKeyboards.go_back())
     await state.set_state(ComplainStates.wait_comment)

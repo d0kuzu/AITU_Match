@@ -30,8 +30,8 @@ async def start(environ: Environ):
     await init_db(environ.db.asyncpg_url)
 
     await bot.set_my_commands([
-        BotCommand(command='menu', description='В меню'),
-        BotCommand(command='my_profile', description='Моя анкета')
+        BotCommand(command='menu', description='📋 В меню'),
+        BotCommand(command='my_profile', description='👤 Моя анкета')
     ])
 
     tg_register = TgRegister(dp, bot, environ)

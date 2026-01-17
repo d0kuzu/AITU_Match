@@ -105,7 +105,6 @@ class ReplyKeyboards:
         builder = ReplyKeyboardBuilder()
         builder.button(text=TEXTS.complain_texts.mature_content)
         builder.button(text=TEXTS.complain_texts.sell_add)
-        builder.button(text=TEXTS.complain_texts.do_not_like)
         builder.button(text=TEXTS.complain_texts.other)
         builder.button(text=TEXTS.complain_texts.back)
         builder.adjust(1)
