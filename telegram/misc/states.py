@@ -42,6 +42,10 @@ class AdminBarcodeStates(StatesGroup):
     wait_barcodes = State()
 
 
+class AdminActionsStates(StatesGroup):
+    wait_username = State()
+
+
 class ComplainStates(StatesGroup):
     wait_reason = State()
     wait_comment = State()

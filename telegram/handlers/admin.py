@@ -5,7 +5,7 @@ from aiogram.types import Message
 
 from database.repo import Repos
 from telegram.filters.role import AdminFilter
-from telegram.misc.states import AdminBarcodeStates
+from telegram.misc.states import AdminBarcodeStates, AdminActionsStates
 
 router = Router()
 router.message.filter(AdminFilter())
@@ -13,12 +13,19 @@ router.message.filter(AdminFilter())
 @router.message(Command("test"))
 async def add_barcodes_start(message: Message, state: FSMContext):
     data = await state.get_data()
-    await message.asnwer(data.get("last_activity"))
+    await message.answer(data.get("last_activity"))
 
 @router.message(Command("add_barcodes"))
 async def add_barcodes_start(message: Message, state: FSMContext):
     await state.set_state(AdminBarcodeStates.wait_barcodes)
     await message.answer("Отправьте баркоды в формате '111111,222222' \n\n-без пробелв \n-баркод свободен \n-длина баркода 6 цифр")
+
+
+@router.message(Command("clear_actions"))
+async def clear_actions_start(message: Message, state: FSMContext):
+    await state.set_state(AdminActionsStates.wait_username)
+    await message.answer("Отправьте юзернейм пользователя которому хотите обнулить действия \nпример:@gileckos")
+
 
 @router.message(AdminBarcodeStates.wait_barcodes)
 async def add_barcodes(message: Message, state: FSMContext, repos: Repos):
@@ -43,4 +50,24 @@ async def add_barcodes(message: Message, state: FSMContext, repos: Repos):
         text = "баркоды приняты"
 
     await message.answer(text)
+    await state.clear()
+
+
+@router.message(AdminActionsStates.wait_username)
+async def clear_actions(message: Message, state: FSMContext, repos: Repos):
+    username = message.text
+
+    if username.count("@") != 1:
+        await message.answer("непохоже на юзернейм")
+        return
+
+    profile = await repos.profile.search_by_username(username)
+    if not profile:
+        await message.answer("профиль с таким юзернеймом отсутствует")
+        return
+
+    user_id = profile.user_id
+    await repos.action.delete_user_actions(user_id)
+
+    await message.answer("действия успешно удалены")
     await state.clear()

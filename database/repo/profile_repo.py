@@ -52,6 +52,21 @@ class ProfileRepo(Repo):
             return None
 
 
+    async def search_by_username(self, username: str) -> Profile|None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    select(Profile)
+                    .where(Profile.username == username)
+                )
+                result = await self.session.execute(stmt)
+                profile = result.scalar_one_or_none()
+            return profile
+        except Exception as e:
+            logging.error(f"profile_repo.search_by_username error {username}: {e}")
+            return None
+
+
     async def get_sex_info(self, user_id: int) -> tuple[SexEnum, OppositeSexEnum] | None:
         try:
             async with self.session.begin():

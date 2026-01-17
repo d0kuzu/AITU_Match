@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Coroutine, Sequence
 
-from sqlalchemy import update, select, delete
+from sqlalchemy import update, select, delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.enums import ActionEnum, ActionStatusEnum
@@ -68,3 +68,20 @@ class ActionRepo(Repo):
                 await self.session.execute(stmt)
         except Exception as e:
             logging.error(f'action_repo.delete_action error {e}')
+
+
+    async def delete_user_actions(self, user_id: int):
+        try:
+            async with self.session.begin():
+                stmt = (
+                    delete(Action)
+                    .where(
+                        or_(
+                        Action.user_id == user_id,
+                        Action.target_id == user_id,
+                        )
+                    )
+                )
+                await self.session.execute(stmt)
+        except Exception as e:
+            logging.error(f'action_repo.delete_user_actions error {e}')
