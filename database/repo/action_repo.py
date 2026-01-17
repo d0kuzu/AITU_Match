@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.enums import ActionEnum, ActionStatusEnum
 from database.models.action import Action
+from database.models.notification import Notification
 from database.repo.repo import Repo
 
 
@@ -73,15 +74,25 @@ class ActionRepo(Repo):
     async def delete_user_actions(self, user_id: int):
         try:
             async with self.session.begin():
-                stmt = (
-                    delete(Action)
-                    .where(
-                        or_(
-                        Action.user_id == user_id,
-                        Action.target_id == user_id,
+                await self.session.execute(
+                    delete(Notification).where(
+                        Notification.action_id.in_(
+                            select(Action.id).where(
+                                or_(
+                                    Action.user_id == user_id,
+                                    Action.target_id == user_id,
+                                )
+                            )
                         )
                     )
                 )
-                await self.session.execute(stmt)
+                await self.session.execute(
+                    delete(Action).where(
+                        or_(
+                            Action.user_id == user_id,
+                            Action.target_id == user_id,
+                        )
+                    )
+                )
         except Exception as e:
             logging.error(f'action_repo.delete_user_actions error {e}')

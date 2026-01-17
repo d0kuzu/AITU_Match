@@ -64,6 +64,7 @@ async def clear_actions(message: Message, state: FSMContext, repos: Repos):
 
     user_id = profile.user_id
     await repos.action.delete_user_actions(user_id)
+    await repos.notification.delete_user_actions(user_id)
 
     await message.answer("действия успешно удалены")
     await state.clear()
