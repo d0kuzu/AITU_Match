@@ -36,3 +36,14 @@ class BarcodeRepo(Repo):
                 await self.session.execute(stmt, values)
         except Exception as e:
             logging.error(f"barcode_repo.add_multiple error {e}")
+
+
+    async def add_all(self, values: list[dict[str, Any]]) -> None:
+        try:
+            async with self.session.begin():
+                stmt = (
+                    insert(Barcode)
+                )
+                await self.session.execute(stmt, values)
+        except Exception as e:
+            logging.error(f"barcode_repo.add_multiple error {e}")
