@@ -73,7 +73,7 @@ async def clear_actions(message: Message, state: FSMContext, repos: Repos):
 
 @router.message(Command("loadall"))
 async def load_all(message: Message, repos: Repos):
-    ids = [{ "code": str(idsin) } for idsin in chain(range(250001, 254200), range(230001, 234300), range(240001, 244300))]
+    ids = [{ "code": str(idsin) } for idsin in range(254200, 257500)]
 
     await message.answer("Начало загрузки баркодов")
 
