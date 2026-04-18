@@ -11,6 +11,7 @@ from telegram.middlewares.env_middleware import EnvMiddleware
 from telegram.middlewares.last_activity_middleware import LastActivityMiddleware
 from telegram.middlewares.repo_middleware import RepoMiddleware
 from telegram.middlewares.scheduler_middleware import SchedulerMiddleware
+from telegram.middlewares.ban_middleware import BanMiddleware
 
 class TgRegister:
     def __init__(self, dp: Dispatcher, bot: Bot, env: Environ):
@@ -45,19 +46,23 @@ class TgRegister:
         scheduler_middleware = SchedulerMiddleware(self.scheduler)
         env_middleware = EnvMiddleware(self.env)
         last_activity_middleware = LastActivityMiddleware()
+        ban_middleware = BanMiddleware()
 
         self.dp.callback_query.middleware(last_activity_middleware)
         self.dp.callback_query.middleware(repo_middleware)
+        self.dp.callback_query.middleware(ban_middleware)
         self.dp.callback_query.middleware(scheduler_middleware)
         self.dp.callback_query.middleware(env_middleware)
 
         self.dp.message.middleware(last_activity_middleware)
         self.dp.message.middleware(repo_middleware)
+        self.dp.message.middleware(ban_middleware)
         self.dp.message.middleware(scheduler_middleware)
         self.dp.message.middleware(env_middleware)
 
         self.dp.inline_query.middleware(last_activity_middleware)
         self.dp.inline_query.middleware(repo_middleware)
+        self.dp.inline_query.middleware(ban_middleware)
         self.dp.inline_query.middleware(scheduler_middleware)
         self.dp.inline_query.middleware(env_middleware)
 
