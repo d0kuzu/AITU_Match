@@ -53,3 +53,4 @@ class ComplainStates(StatesGroup):
 
 class AdminBanStates(StatesGroup):
     wait_user_id = State()
+    wait_unban_user_id = State()

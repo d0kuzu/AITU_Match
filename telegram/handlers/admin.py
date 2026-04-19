@@ -35,6 +35,12 @@ async def ban_user_start(message: Message, state: FSMContext):
     await message.answer("Отправьте user_id пользователя которого хотите забанить")
 
 
+@router.message(Command("unban"))
+async def unban_user_start(message: Message, state: FSMContext):
+    await state.set_state(AdminBanStates.wait_unban_user_id)
+    await message.answer("Отправьте user_id пользователя которого хотите разбанить")
+
+
 @router.message(Command("complaints"))
 async def list_complaints(message: Message, repos: Repos):
     complaints = await repos.complaint.get_all()
@@ -128,3 +134,36 @@ async def ban_user(message: Message, state: FSMContext, repos: Repos):
 
     await message.answer(f"Пользователь {user_id} успешно удален из всех таблиц и забанен.")
     await state.clear()
+
+
+@router.message(AdminBanStates.wait_unban_user_id)
+async def unban_user(message: Message, state: FSMContext, repos: Repos):
+    if not message.text or not message.text.isdigit():
+        await message.answer("User ID должен быть числом")
+        return
+
+    user_id = int(message.text)
+
+    await repos.ban.remove_ban(user_id)
+
+    await message.answer(f"Пользователь {user_id} успешно разбанен.")
+    await state.clear()
+
+
+@router.message(Command("list_banned"))
+async def list_banned(message: Message, repos: Repos):
+    banned_users = await repos.ban.get_all_banned()
+    if not banned_users:
+        await message.answer("Нет забаненных пользователей")
+        return
+
+    text = "Забаненные пользователи:\n\n"
+    for user_id in banned_users:
+        text += f"ID: {user_id}\n"
+
+    if len(text) > 4000:
+        for x in range(0, len(text), 4000):
+            await message.answer(text[x:x+4000])
+    else:
+        await message.answer(text)
+        
