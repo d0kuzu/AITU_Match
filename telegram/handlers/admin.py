@@ -48,7 +48,6 @@ async def list_complaints(message: Message, repos: Repos):
         username = f"@{target.username}" if target and target.username else f"ID: {complaint.target_id}"
         text += f"Кому: {username}\nПричина: {complaint.reason}\nКомментарий: {complaint.comment}\nДата: {complaint.created_at.strftime('%Y-%m-%d %H:%M')}\n\n"
 
-    # Split message if it's too long (max 4096 chars)
     if len(text) > 4000:
         for x in range(0, len(text), 4000):
             await message.answer(text[x:x+4000])
