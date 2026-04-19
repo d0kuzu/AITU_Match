@@ -1,7 +1,8 @@
 import json
 import logging
 
-from sqlalchemy import select, or_, and_, true, update, false
+from sqlalchemy import select, or_, and_, true, update, false, delete
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.enums import SexEnum, OppositeSexEnum
@@ -30,3 +31,12 @@ class ComplaintRepo(Repo):
         except Exception as e:
             logging.error(f"complaint_repo.create error {target_id}: {e}")
             return None
+
+    async def get_all(self) -> list[Complaint]:
+        stmt = select(Complaint).options(selectinload(Complaint.target_profile))
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
+    async def delete_all(self):
+        async with self.session.begin():
+            await self.session.execute(delete(Complaint))

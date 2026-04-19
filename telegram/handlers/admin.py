@@ -35,6 +35,30 @@ async def ban_user_start(message: Message, state: FSMContext):
     await message.answer("Отправьте user_id пользователя которого хотите забанить")
 
 
+@router.message(Command("complaints"))
+async def list_complaints(message: Message, repos: Repos):
+    complaints = await repos.complaint.get_all()
+    if not complaints:
+        await message.answer("Жалоб пока нет.")
+        return
+
+    text = "Список жалоб:\n\n"
+    for complaint in complaints:
+        target = complaint.target_profile
+        username = f"@{target.username}" if target and target.username else f"ID: {complaint.target_id}"
+        text += f"Кому: {username}\nПричина: {complaint.reason}\nКомментарий: {complaint.comment}\nДата: {complaint.created_at.strftime('%Y-%m-%d %H:%M')}\n\n"
+
+    # Split message if it's too long (max 4096 chars)
+    if len(text) > 4000:
+        for x in range(0, len(text), 4000):
+            await message.answer(text[x:x+4000])
+    else:
+        await message.answer(text)
+
+    await repos.complaint.delete_all()
+    await message.answer("Все жалобы удалены из базы данных.")
+
+
 @router.message(AdminBarcodeStates.wait_barcodes)
 async def add_barcodes(message: Message, state: FSMContext, repos: Repos):
     barcodes: list[str] = message.text.split(',')
