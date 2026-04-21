@@ -1,1 +1,1 @@
-specializations = ["SE", "MT", "CybSec", "BDA", "MCS", "BDH", "CS", "SST", "ST", "DJ", "DPA", "AB", "IE", "IM", "DTNPE", "IIT", "EE"]
+specializations = ["SE", "MT", "CybSec", "CB", "BDA", "MCS", "BDH", "CS", "SST", "ST", "DJ", "DPA", "AB", "IE", "IM", "DTNPE", "IIT", "EE"]
