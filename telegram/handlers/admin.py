@@ -7,13 +7,14 @@ from aiogram.types import Message
 
 from database.repo import Repos
 from telegram.filters.role import AdminFilter
-from telegram.misc.states import AdminBarcodeStates, AdminActionsStates, AdminBanStates
+from telegram.misc.states import AdminBarcodeStates, AdminActionsStates, AdminBanStates, MenuStates
 
 router = Router()
 router.message.filter(AdminFilter())
 
 @router.message(Command("test"))
-async def add_barcodes_start(message: Message, state: FSMContext):
+async def test_command(message: Message, state: FSMContext):
+    await state.set_state(MenuStates.main_menu)
     data = await state.get_data()
     await message.answer(data.get("last_activity"))
 
@@ -41,8 +42,21 @@ async def unban_user_start(message: Message, state: FSMContext):
     await message.answer("Отправьте user_id пользователя которого хотите разбанить")
 
 
+@router.message(Command("stats"))
+async def get_stats(message: Message, state: FSMContext, repos: Repos):
+    await state.set_state(MenuStates.main_menu)
+    stats = await repos.profile.get_stats()
+    text = (
+        f"всего профилей: {stats['total']}\n"
+        f"мужского пола: {stats['male']}\n"
+        f"женского пола: {stats['female']}"
+    )
+    await message.answer(text)
+
+
 @router.message(Command("complaints"))
-async def list_complaints(message: Message, repos: Repos):
+async def list_complaints(message: Message, state: FSMContext, repos: Repos):
+    await state.set_state(MenuStates.main_menu)
     complaints = await repos.complaint.get_all()
     if not complaints:
         await message.answer("Жалоб пока нет.")
@@ -107,7 +121,8 @@ async def clear_actions(message: Message, state: FSMContext, repos: Repos):
 
 
 @router.message(Command("loadall"))
-async def load_all(message: Message, repos: Repos):
+async def load_all(message: Message, state: FSMContext, repos: Repos):
+    await state.set_state(MenuStates.main_menu)
     ids = [{ "code": str(idsin) } for idsin in range(254200, 257500)]
 
     await message.answer("Начало загрузки баркодов")
@@ -151,7 +166,8 @@ async def unban_user(message: Message, state: FSMContext, repos: Repos):
 
 
 @router.message(Command("list_banned"))
-async def list_banned(message: Message, repos: Repos):
+async def list_banned(message: Message, state: FSMContext, repos: Repos):
+    await state.set_state(MenuStates.main_menu)
     banned_users = await repos.ban.get_all_banned()
     if not banned_users:
         await message.answer("Нет забаненных пользователей")

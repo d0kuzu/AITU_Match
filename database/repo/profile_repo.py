@@ -120,6 +120,28 @@ class ProfileRepo(Repo):
             logging.error(f"profile_repo.search_random_user error {user_id}: {e}")
 
 
+    async def get_stats(self) -> dict:
+        try:
+            async with self.session.begin():
+                from sqlalchemy import func
+                total_stmt = select(func.count(Profile.user_id))
+                male_stmt = select(func.count(Profile.user_id)).where(Profile.sex == SexEnum.MALE)
+                female_stmt = select(func.count(Profile.user_id)).where(Profile.sex == SexEnum.FEMALE)
+
+                total = (await self.session.execute(total_stmt)).scalar()
+                male = (await self.session.execute(male_stmt)).scalar()
+                female = (await self.session.execute(female_stmt)).scalar()
+
+                return {
+                    "total": total,
+                    "male": male,
+                    "female": female
+                }
+        except Exception as e:
+            logging.error(f"profile_repo.get_stats error: {e}")
+            return {"total": 0, "male": 0, "female": 0}
+
+
     async def save_profile(self, user_id: int, data: dict):
         try:
             async with self.session.begin():
