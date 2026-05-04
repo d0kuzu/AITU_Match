@@ -13,3 +13,5 @@ async def actions_refresher():
         for action in actions:
             if action.action_type == ActionEnum.skip and action.created_at <= datetime.now() - timedelta(days=10):
                 await repos.action.delete_action(action.id)
+            if action.action_type == ActionEnum.like and action.created_at <= datetime.now() - timedelta(days=15):
+                await repos.action.delete_action(action.id)
